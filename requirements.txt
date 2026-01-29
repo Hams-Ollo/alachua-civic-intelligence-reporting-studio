@@ -1,0 +1,10 @@
+langchain
+langchain-google-genai
+langgraph
+pydantic
+python-dotenv
+supabase
+tavily-python
+firecrawl-py
+beautifulsoup4
+requests

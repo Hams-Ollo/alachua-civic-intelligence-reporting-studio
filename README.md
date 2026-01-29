@@ -1,32 +1,89 @@
 # 🏛️ Alachua Civic Intelligence System
 
-**Version:** 1.0  
-**Date:** 📅 January 2026  
+**An AI-powered local government accountability monitoring platform**
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![LangGraph](https://img.shields.io/badge/orchestration-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
+[![Supabase](https://img.shields.io/badge/database-Supabase-green.svg)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 **Location:** 📍 City of Alachua, Alachua County, Florida, USA  
-**Primary Use Case:** 🌳 Environmental Protection & Democratic Accountability Monitoring
-
----
-
-## 🎯 Mission
-
-This agent prompt library empowers citizens to monitor, understand, and participate in their democratic institutions through AI-assisted research, analysis, and communication.
-
-Grounded in universal reverence for life and environmental stewardship—not partisan divisions—this system transforms publicly available government data into accessible, actionable intelligence for community members.
+**Version:** 2.0 (Automated Architecture)  
+**Status:** 🚧 Active Development
 
 > *"Understanding systems is the path to freedom."*
 
 ---
 
-## 📋 Overview
+## 🎯 The Problem
 
-The Alachua Civic Intelligence System is a collection of structured AI prompts designed to:
+Local government decisions happen fast. Agendas are posted days before meetings. Permit applications are buried in obscure portals. Public notices appear in newspapers most people don't read. By the time citizens learn about a development project threatening their water supply, it's often too late to respond.
 
-1. **🔍 Scout** — Continuously scan government sources for new information, meetings, permits, and decisions
-2. **🧠 Analyze** — Process raw data into meaningful insights, patterns, and compliance assessments
-3. **📊 Synthesize** — Generate accessible reports, public education content, and strategic campaign plans
-4. **⚡ Act** — Empower citizens with specific next steps, deadlines, and participation opportunities
+**The Tara Development Case Study:**  
+The "Tara" development portfolio (~580 acres, 1,000+ homes) sits directly above **Mill Creek Sink**—a karst feature with a proven 12-day hydrologic connection to Hornsby Spring via the Floridan Aquifer. Despite documented environmental concerns, the project has advanced through fragmented municipal processes across City, County, and State agencies.
 
-Inspired by the Mill Creek Sink / Tara development case, this system enables citizens to detect threats early, document violations systematically, and coordinate effective advocacy campaigns.
+This system exists to ensure **no civic action goes unnoticed**.
+
+---
+
+## 💡 The Solution
+
+An automated **AI agent system** that continuously monitors 15+ government data sources, detects new documents within hours of publication, extracts actionable intelligence, and generates weekly reports for community distribution.
+
+```mermaid
+flowchart TB
+    subgraph Sources["🌐 Government Data Sources"]
+        S1[City of Alachua<br/>CivicClerk Portal]
+        S2[Alachua County<br/>eScribe Meetings]
+        S3[SRWMD<br/>Water Permits]
+        S4[Florida Public Notices<br/>Legal Notices]
+        S5[County GIS<br/>Map Genius]
+    end
+
+    subgraph Monitor["👁️ Change Detection"]
+        CD[Playwright + Firecrawl<br/>SPA Scraping]
+        PDF[PDF Processor<br/>pdfplumber + Gemini]
+    end
+
+    subgraph Agents["🤖 LangGraph Agent Orchestration"]
+        subgraph L1["Layer 1: Scouts (Daily)"]
+            A1[A1: Meeting Scout]
+            A2[A2: Permit Scout]
+            A3[A3: Legislative Monitor]
+        end
+        
+        subgraph L2["Layer 2: Analysts (Weekly)"]
+            B1[B1: Impact Analyst]
+            B2[B2: Procedural Analyst]
+        end
+        
+        subgraph L3["Layer 3: Synthesizers (Monthly)"]
+            C1[C1: Newsletter Generator]
+            C2[C2: Social Media Planner]
+        end
+    end
+
+    subgraph Storage["💾 Knowledge Base"]
+        DB[(Supabase PostgreSQL<br/>Structured Reports)]
+        VEC[(pgvector<br/>Semantic Search)]
+        DOCS[(Document Archive<br/>Original PDFs)]
+    end
+
+    subgraph Output["📤 Community Distribution"]
+        NEWS[Weekly Newsletter]
+        DASH[Alert Dashboard]
+        API[REST API]
+    end
+
+    Sources --> Monitor
+    Monitor --> L1
+    L1 --> DB
+    DB --> L2
+    L2 -->|Human Approval| L3
+    L3 --> NEWS & DASH
+    DB --> VEC
+    DOCS --> VEC
+```
 
 ---
 
@@ -34,439 +91,289 @@ Inspired by the Mill Creek Sink / Tara development case, this system enables cit
 
 ### Three-Layer Agent Framework
 
+| Layer | Agents | Frequency | Purpose |
+|:------|:-------|:----------|:--------|
+| **Layer 1: Scouts** | A1-A4 | Daily | Data collection from government portals. Deterministic, fact-based extraction. |
+| **Layer 2: Analysts** | B1-B2 | Weekly | Pattern recognition across Scout data. Deep research via Tavily. |
+| **Layer 3: Synthesizers** | C1-C4 | Monthly | Public-facing content generation. Requires human approval before publishing. |
+
+### Technology Stack
+
+```mermaid
+graph LR
+    subgraph Frontend["🖥️ API Layer"]
+        FAST[FastAPI + Uvicorn]
+        SSE[Server-Sent Events]
+    end
+
+    subgraph Orchestration["🔀 Orchestration"]
+        LG[LangGraph<br/>Multi-Agent Workflows]
+        APS[APScheduler<br/>Cron Jobs]
+    end
+
+    subgraph AI["🧠 AI/ML"]
+        GEM[Gemini 2.5 Pro/Flash]
+        TAV[Tavily Search]
+        EMB[Embeddings + RAG]
+    end
+
+    subgraph Data["💾 Data Layer"]
+        SUP[(Supabase<br/>PostgreSQL + pgvector)]
+        STORE[(Supabase Storage<br/>PDF Archive)]
+    end
+
+    subgraph Scraping["🕷️ Scraping"]
+        PW[Playwright<br/>SPA Rendering]
+        FC[Firecrawl<br/>LLM-ready Markdown]
+        PP[pdfplumber<br/>PDF Extraction]
+    end
+
+    FAST --> LG
+    LG --> GEM & TAV
+    LG --> SUP
+    APS --> LG
+    Scraping --> LG
+    GEM --> EMB --> SUP
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  LAYER 1: SCOUTS (Daily/Weekly)                                     │
-│  Data collection agents monitoring specific sources                 │
-│  Output: Raw intelligence reports                                   │
-├─────────────────────────────────────────────────────────────────────┤
-│  LAYER 2: ANALYSTS (Weekly)                                         │
-│  Process scout data for deeper insights and pattern recognition     │
-│  Output: Strategic intelligence reports                             │
-├─────────────────────────────────────────────────────────────────────┤
-│  LAYER 3: SYNTHESIZERS (Monthly/Quarterly/Annual)                   │
-│  Aggregate intelligence for public education and campaign planning  │
-│  Output: Public-facing content and advocacy strategies              │
-└─────────────────────────────────────────────────────────────────────┘
+
+| Component | Technology | Purpose |
+|:----------|:-----------|:--------|
+| **Web Server** | FastAPI + Uvicorn | REST API, SSE streaming, approval endpoints |
+| **Orchestration** | LangGraph | Multi-agent workflows with human-in-the-loop |
+| **Scheduling** | APScheduler | Daily/weekly/monthly cron triggers |
+| **LLM** | Gemini 2.5 Pro & Flash | Pro for reasoning, Flash for extraction |
+| **Search** | Tavily | AI-optimized web research |
+| **Database** | Supabase (PostgreSQL) | Structured data, JSONB, pgvector |
+| **Document Storage** | Supabase Storage | PDF archive with full traceability |
+| **Validation** | Pydantic v2 | Strict schemas for all data |
+| **Scraping** | Playwright + Firecrawl | JavaScript rendering, PDF processing |
+
+---
+
+## 📊 Data Flow: From Source to Newsletter
+
+```mermaid
+sequenceDiagram
+    participant CRON as ⏰ Scheduler
+    participant SCOUT as 🔍 Scout Agent
+    participant SRC as 🌐 CivicClerk
+    participant PDF as 📄 PDF Processor
+    participant DB as 💾 Supabase
+    participant ANALYST as 🧠 Analyst Agent
+    participant HUMAN as 👤 Human Reviewer
+    participant SYNTH as 📝 Synthesizer
+    participant EMAIL as 📧 Newsletter
+
+    CRON->>SCOUT: Daily trigger (6 AM)
+    SCOUT->>SRC: Fetch meeting list (Playwright)
+    SRC-->>SCOUT: JSON + PDF links
+    SCOUT->>PDF: Download agenda packets
+    PDF-->>SCOUT: Extracted text + tables
+    SCOUT->>DB: Store ScoutReport + embeddings
+    
+    Note over DB: Deduplicate via content hash
+    
+    CRON->>ANALYST: Weekly trigger (Monday 9 AM)
+    ANALYST->>DB: Query RED/YELLOW alerts
+    ANALYST->>ANALYST: Tavily deep research
+    ANALYST->>DB: Store AnalystReport
+    ANALYST->>HUMAN: interrupt() - Approval required
+    
+    HUMAN-->>ANALYST: Approved ✓
+    
+    ANALYST->>SYNTH: Resume workflow
+    SYNTH->>SYNTH: Generate newsletter content
+    SYNTH->>EMAIL: Send via Resend API
 ```
 
 ---
 
-## 📁 Folder Structure
+## 📁 Project Structure
 
 ```
-alachua-civic-intelligence/
+alachua-civic-intelligence-reporting-studio/
+├── src/
+│   ├── main.py                     # FastAPI application entry point
+│   ├── config.py                   # Environment configuration
+│   ├── database.py                 # Supabase client
+│   ├── schemas.py                  # Pydantic models
+│   ├── registry.py                 # Source URL registry
+│   │
+│   ├── agents/
+│   │   ├── base.py                 # Base agent class
+│   │   ├── scout.py                # A1-A4 Scout implementations
+│   │   └── analyst.py              # B1-B2 Analyst implementations
+│   │
+│   ├── workflows/
+│   │   ├── graphs.py               # LangGraph workflow definitions
+│   │   ├── checkpointer.py         # Supabase state persistence
+│   │   └── nodes.py                # Reusable node functions
+│   │
+│   ├── api/
+│   │   └── routes/
+│   │       ├── workflows.py        # POST /run, GET /status
+│   │       ├── approvals.py        # Human-in-the-loop endpoints
+│   │       └── streaming.py        # SSE for real-time updates
+│   │
+│   ├── tools/
+│   │   ├── civicclerk_scraper.py   # CivicClerk SPA scraper
+│   │   ├── pdf_processor.py        # pdfplumber + Gemini hybrid
+│   │   └── document_storage.py     # Supabase file management
+│   │
+│   └── scheduler/
+│       ├── manager.py              # APScheduler setup
+│       └── jobs.py                 # Scheduled task definitions
 │
-├── README.md                           # This document
+├── prompt_library/                 # Agent prompt templates
+│   ├── config/                     # Source registry, geographic scope
+│   ├── layer-1-scouts/             # A1-A4 prompts
+│   ├── layer-2-analysts/           # B1-B2 prompts
+│   └── layer-3-synthesizers/       # C1-C4 prompts
 │
-├── config/
-│   ├── source-registry.md              # Master list of all data sources with URLs
-│   └── geographic-scope.md             # Jurisdiction boundaries and focus areas
+├── docs/
+│   ├── PLAN.md                     # Technical architecture plan
+│   └── DEVELOPER_GUIDE.md          # Setup and contribution guide
 │
-├── layer-1-scouts/
-│   ├── A1-meeting-intelligence-scout.md
-│   ├── A2-permit-application-scout.md
-│   ├── A3-legislative-code-monitor.md
-│   └── A4-entity-relationship-mapper.md
+├── data/                           # Generated reports by frequency
+│   ├── daily/
+│   ├── weekly/
+│   └── monthly/
 │
-├── layer-2-analysts/
-│   ├── B1-impact-assessment-analyst.md
-│   └── B2-procedural-integrity-analyst.md
-│
-├── layer-3-synthesizers/
-│   ├── C1-public-education-content-generator.md
-│   ├── C2-strategic-campaign-planner.md
-│   ├── C3-quarterly-democratic-health-scorecard.md
-│   └── C4-annual-review-and-forecast.md
-│
-├── templates/
-│   ├── report-output-standard.md       # Standard markdown report format
-│   ├── newsletter-format.md            # Weekly/monthly newsletter template
-│   ├── social-media-templates.md       # Platform-specific post formats
-│   └── public-comment-template.md      # Template for official public comments
-│
-└── outputs/                            # Where generated reports are saved
-    ├── daily/
-    ├── weekly/
-    ├── monthly/
-    ├── quarterly/
-    └── annual/
+├── requirements.txt
+├── .env.example
+└── README.md
 ```
 
 ---
 
-## 💬 The Prompts
+## 🌐 Monitored Data Sources
 
-### 🔍 Layer 1: Scouts (Data Collection)
+| Tier | Source | Platform | Priority | Scraping Method |
+|:-----|:-------|:---------|:---------|:----------------|
+| **1** | City of Alachua Meetings | CivicClerk (SPA) | 🔴 Critical | Playwright + XHR interception |
+| **1** | Development Projects Map | Granicus CMS | 🔴 Critical | BeautifulSoup |
+| **2** | Alachua County Meetings | eScribe | 🔴 Critical | Playwright + PDF download |
+| **2** | Map Genius (Projects) | County GIS | 🔴 Critical | JSON API |
+| **3** | SRWMD Water Permits | E-Permitting Portal | 🔴 Critical | Form submission + scrape |
+| **4** | Florida Public Notices | Statewide Repository | 🔴 Critical | Filter by county + parse |
+| **5** | WUFT Environment News | WordPress | 🟡 High | RSS feed |
 
-| Prompt | Purpose | Schedule | Key Sources |
-|--------|---------|----------|-------------|
-| **A1: Meeting Intelligence Scout** | Track upcoming/recent public meetings, agendas, votes | Daily or 2-3x/week | City/County meeting portals, agendas, minutes |
-| **A2: Permit & Application Scout** | Monitor development permits and environmental applications | Daily or 2-3x/week | City/County development portals, WMD, DEP |
-| **A3: Legislative & Code Monitor** | Track changes to laws, codes, comprehensive plans | Weekly or when ordinances proposed | Municipal codes, state legislature, comp plan amendments |
-| **A4: Entity & Relationship Mapper** | Document connections between developers, officials, consultants | Weekly or as needed | Campaign finance, Sunbiz, property records, LinkedIn |
-
-### 🧠 Layer 2: Analysts (Strategic Intelligence)
-
-| Prompt | Purpose | Schedule | Input |
-|--------|---------|----------|-------|
-| **B1: Impact Assessment Analyst** | Synthesize cumulative environmental and community impacts | Weekly (Monday) | All scout reports from previous week |
-| **B2: Procedural Integrity Analyst** | Monitor democratic processes, transparency, Sunshine Law compliance | Weekly | Meeting records, procedural documentation |
-
-### 📊 Layer 3: Synthesizers (Public Output & Strategy)
-
-| Prompt | Purpose | Schedule | Output |
-|--------|---------|----------|--------|
-| **C1: Public Education Content Generator** | Translate intelligence into accessible public content | Monthly | Newsletter articles, social threads, talking points, FAQs |
-| **C2: Strategic Campaign Planner** | Develop tactical advocacy campaigns | Monthly | Campaign plans with timelines, stakeholder analysis, resource allocation |
-| **C3: Democratic Health Scorecard** | Assess cumulative state of local democratic accountability | Quarterly | Comprehensive assessment with metrics and trend analysis |
-| **C4: Annual Review & Forecast** | Year-in-review and forward-looking analysis | Annually | Full year synthesis, pattern identification, strategic recommendations |
+Full registry: [`prompt_library/config/source-registry.md`](prompt_library/config/source-registry.md)
 
 ---
 
 ## 🚀 Quick Start
 
-### Step 1: Choose Your Entry Point
+### Prerequisites
 
-**⚡ Minimum Viable Monitoring (30 min/day):**
-- Run A1 (meetings) and A2 (permits) daily
-- Flag urgent items for immediate attention
+- Python 3.10+
+- Docker (optional, for local Supabase)
+- API keys: Google AI (Gemini), Tavily, Firecrawl, Supabase
 
-**📈 Standard Monitoring (5-8 hrs/week):**
-- Daily: A1 + A2
-- Weekly: A3 + A4 + B1 + B2
-- Monthly: C1 + C2
+### Installation
 
-**🎯 Full System (10-15 hrs/week):**
-- All of the above, plus quarterly C3 and annual C4
-- Active content publishing and campaign execution
+```bash
+# Clone the repository
+git clone https://github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio.git
+cd alachua-civic-intelligence-reporting-studio
 
-### Step 2: How to Use a Prompt
+# Create virtual environment
+python -m venv .venv
+.venv\Scripts\activate  # Windows
+# source .venv/bin/activate  # macOS/Linux
 
-1. Open the prompt file (e.g., `A1-meeting-intelligence-scout.md`)
-2. Copy the entire prompt text
-3. Paste into your AI system (Claude recommended)
-4. AI executes research and generates formatted markdown report
-5. Save output to appropriate `/outputs/` subfolder
-6. Repeat on schedule
+# Install dependencies
+pip install -r requirements.txt
 
-### Step 3: Output Organization
-
-Save outputs with date-stamped filenames:
-
-```
-outputs/
-├── daily/
-│   ├── 2026-01-20-A1-meetings.md
-│   ├── 2026-01-20-A2-permits.md
-│   └── ...
-├── weekly/
-│   ├── 2026-W03-B1-impact-assessment.md
-│   ├── 2026-W03-B2-procedural-review.md
-│   └── ...
-├── monthly/
-│   ├── 2026-01-C1-public-content.md
-│   ├── 2026-01-C2-strategic-plan.md
-│   └── ...
-├── quarterly/
-│   └── 2026-Q1-C3-health-scorecard.md
-└── annual/
-    └── 2026-C4-annual-review.md
+# Configure environment
+cp .env.example .env
+# Edit .env with your API keys
 ```
 
----
+### Environment Variables
 
-## 🔄 Implementation Workflow
-
-### ☀️ Daily Routine (15-30 minutes)
-
-| Time | Action |
-|------|--------|
-| Morning | Run A1 (meetings) and A2 (permits) |
-| Review | Flag urgent items requiring immediate attention |
-| Alert | Notify team if critical hearing/deadline detected |
-
-### 📅 Weekly Routine (3-4 hours total)
-
-| Day | Action |
-|-----|--------|
-| Monday | Run A3 (legislative) and A4 (relationships) |
-| Wednesday | Compile week's scout data, note patterns |
-| Friday | Run B1 (impact) and B2 (procedural) |
-| Friday PM | Review analysis, identify priorities, brief coalition |
-
-### 📆 Monthly Routine (4-6 hours)
-
-| Week | Action |
-|------|--------|
-| Week 4 | Run C1 (content generator) and C2 (campaign planner) |
-| Week 4 | Compile monthly report package |
-| Week 1 (new month) | Publish newsletter, launch social content, brief volunteers |
-| Week 1 | Conduct retrospective on previous month's effectiveness |
-
-### 📊 Quarterly Routine (2-3 hours)
-
-- Run C3 (Democratic Health Scorecard)
-- Assess cumulative trends across all domains
-- Adjust strategy based on scorecard findings
-- Share key metrics with coalition and public
-
-### 🗓️ Annual Routine (4-6 hours)
-
-- Run C4 (Annual Review & Forecast)
-- Full synthesis of year's findings
-- Identify multi-year patterns
-- Develop strategic priorities for coming year
-- Publish annual report to community
-
----
-
-## 🔄 Output Pipeline
-
+```bash
+# .env
+GOOGLE_API_KEY=your_gemini_api_key
+TAVILY_API_KEY=your_tavily_key
+FIRECRAWL_API_KEY=your_firecrawl_key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_KEY=your_supabase_anon_key
+SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
 ```
-┌─────────────┐     ┌─────────────┐     ┌─────────────────┐
-│   SCOUTS    │────▶│  ANALYSTS   │───▶│  SYNTHESIZERS  │
-│  (Raw Data) │     │ (Insights)  │     │ (Public Content)│
-└─────────────┘     └─────────────┘     └────────┬────────┘
-                                                 │
-                                                 ▼
-                                    ┌────────────────────────┐
-                                    │    KNOWLEDGE BASE      │
-                                    │  (Searchable Archive)  │
-                                    └────────────┬───────────┘
-                                                 │
-                    ┌────────────────────────────┼────────────────────────────┐
-                    ▼                            ▼                            ▼
-           ┌───────────────┐           ┌─────────────────┐           ┌───────────────┐
-           │  Newsletter   │           │  Social Media   │           │ Blog/Substack │
-           │   (Weekly)    │           │ (Daily/Weekly)  │           │  (In-depth)   │
-           └───────────────┘           └─────────────────┘           └───────────────┘
-                    │                            │                            │
-                    └────────────────────────────┼────────────────────────────┘
-                                                 ▼
-                                    ┌────────────────────────┐
-                                    │   INFORMED CITIZENS    │
-                                    │  (Taking Action)       │
-                                    └────────────────────────┘
+
+### Running the Server
+
+```bash
+# Start the FastAPI server
+uvicorn src.main:app --reload --port 8000
+
+# The API will be available at http://localhost:8000
+# Docs at http://localhost:8000/docs
+```
+
+### Running Agents Manually
+
+```bash
+# Run a specific Scout agent
+curl -X POST "http://localhost:8000/run" \
+  -H "Content-Type: application/json" \
+  -d '{"agent": "A1", "url": "https://alachuafl.portal.civicclerk.com/"}'
+
+# Check pending approvals
+curl "http://localhost:8000/approvals/pending"
+
+# Approve an analyst report
+curl -X POST "http://localhost:8000/approvals/{thread_id}/decide" \
+  -H "Content-Type: application/json" \
+  -d '{"decision": "approved", "comments": "Looks good!"}'
 ```
 
 ---
 
-## 📚 Key Data Sources
+## 📅 Roadmap
 
-### 🏛️ City of Alachua
-- City Commission agendas and minutes
-- Planning & Zoning Board materials
-- City ordinances and comprehensive plan
-- Permit applications and staff reports
-- Public records portal
+### Phase 1: Foundation ✅
+- [x] Project structure and configuration
+- [x] Pydantic schemas for all data models
+- [x] Supabase database connection
+- [x] Source registry documentation
 
-### 🏢 Alachua County
-- Board of County Commissioners agendas/minutes
-- Environmental Protection Department
-- Growth Management Department
-- County code and comprehensive plan
-- Development review applications
+### Phase 2: Scout Layer (Current) 🚧
+- [ ] CivicClerk scraper with Playwright
+- [ ] PDF processing pipeline (pdfplumber + Gemini)
+- [ ] Document storage with Supabase
+- [ ] Change detection and deduplication
 
-### 🌴 State of Florida
-- Department of Environmental Protection (DEP)
-- Water Management Districts (SRWMD, SJRWMD)
-- Florida Legislature bill tracking
-- Administrative hearing records (DOAH)
-- Sunbiz corporate registry
+### Phase 3: Analyst Layer
+- [ ] LangGraph workflow implementation
+- [ ] Tavily integration for deep research
+- [ ] Human approval checkpoint (interrupt/resume)
+- [ ] FastAPI approval endpoints
 
-### 🦅 Federal
-- EPA Region 4 actions
-- Army Corps of Engineers permits
-- USGS water monitoring data
+### Phase 4: Synthesizer Layer
+- [ ] Newsletter generation with MJML
+- [ ] Resend email integration
+- [ ] Social media content templates
+- [ ] Quarterly health scorecard
 
-### 🔗 Other
-- Local news (Gainesville Sun, Alachua County Today)
-- Campaign finance records
-- Property appraiser records
-- Court records (when relevant)
-
-*Full URLs and access details maintained in `config/source-registry.md`*
+### Phase 5: Production Hardening
+- [ ] APScheduler cron integration
+- [ ] Error handling and retry logic
+- [ ] Monitoring and alerting
+- [ ] Docker deployment
 
 ---
 
-## 🌊 Primary Use Case: Mill Creek Sink & Tara Development
+## 🤝 Contributing
 
-This system was developed in response to the proposed Tara development—a 1,000+ home project on ~580 acres of karst terrain directly connected to Mill Creek Sink and the Floridan Aquifer.
+We welcome contributions! Please see [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_GUIDE.md) for setup instructions and coding standards.
 
-### ❗ Why This Matters
-
-- Water entering Mill Creek Sink reaches Hornsby Spring in **12 days**
-- Contamination risks are immediate, not theoretical
-- Procedural irregularities and potential conflicts of interest have been documented
-- Whistleblower allegations from resigned city planner raise serious accountability questions
-
-### 💪 What This System Enables
-
-**Immediate:** Monitor all Tara-related hearings, permits, and regulatory actions
-
-**Ongoing:** Track cumulative development impacts on karst terrain and aquifer recharge areas
-
-**Systemic:** Document patterns of procedural shortcuts, conflicts of interest, and accountability gaps
-
-**Long-term:** Build evidence base for stronger karst protection ordinances and democratic reforms
-
----
-
-## ⚖️ Core Principles
-
-### 1. 📖 Evidence-Based Analysis
-All claims traceable to documented sources. Acknowledge uncertainty. Never overstate conclusions.
-
-### 2. 🌍 Earth as Compass
-Frame issues around shared values—clean water, public safety, environmental stewardship—not partisan divisions. Left/right framing divides; water unites.
-
-### 3. ♿ Accessibility
-Transform technical, legal, and regulatory language into plain language any community member can understand and act upon.
-
-### 4. 🎬 Actionability
-Every report answers: *"What can a concerned citizen do with this information?"* Include specific actions, deadlines, and participation opportunities.
-
-### 5. 🔍 Transparency About Process
-Be clear about what AI analysis can and cannot do. Augments human judgment—does not replace community engagement.
-
-### 6. 🗳️ Respect for Democratic Processes
-The goal is to make democracy work better, not to circumvent it. Strengthen public participation, don't undermine legitimate institutions.
-
----
-
-## ✅ Best Practices
-
-### 🔄 Consistency is Key
-- Set a regular schedule and maintain it
-- Daily scouts catch things weekly scouts miss
-- Cumulative data reveals patterns individual snapshots don't
-
-### ✔️ Verify Before Acting
-- Always check AI outputs against primary sources
-- Cite documents, not AI summaries
-- When in doubt, file a public records request
-
-### 🏛️ Build Institutional Knowledge
-- Save all outputs in organized folders
-- Tag for easy retrieval
-- Build entity profiles over time (developers, officials, consultants)
-
-### 📢 Share Intelligently
-- Raw intelligence reports → internal only
-- Public content (from C1) → share widely
-- Procedural violations → may need legal review first
-
-### 🔒 Protect Privacy
-- Track only public figures acting in public capacity
-- No doxxing of private citizens
-- Focus on decisions and processes, not personal attacks
-
-### 🔧 Iterate and Improve
-- Note what works and what doesn't
-- Adjust prompts based on results
-- Share improvements with the community
-
----
-
-## 🔧 Troubleshooting
-
-| Problem | Solution |
-|---------|----------|
-| AI can't access websites | Manually copy/paste agendas and documents into prompt, then ask AI to analyze |
-| Too much data, AI overwhelmed | Break into smaller chunks (one meeting, one permit at a time) |
-| Outputs too long/verbose | Add to prompt: "Be concise. Prioritize top 3 items. Use bullets." |
-| Outputs too technical | Use C1 (Content Generator) to translate into plain language |
-| Not finding key information | Check source registry—website may have changed. Update URLs. |
-| Outputs not actionable | Emphasize in prompt: "Focus on next steps with specific deadlines." |
-
----
-
-## 🌐 Customization for Other Communities
-
-This system can be adapted for any community:
-
-### 1. 🔄 Update Data Sources
-Replace Alachua URLs with your jurisdiction's websites in `config/source-registry.md`
-
-### 2. 🔑 Customize Keywords
-- Replace "Mill Creek Sink" with your local environmental features
-- Update "Tara April" with your current development threat
-- Adjust priorities (karst → coastal → wetlands, etc.)
-
-### 3. ⚖️ Adjust Legal Framework
-- Verify state/local procedural requirements
-- Update Sunshine Law citations if different state
-- Add local charter requirements
-
-### 4. 💬 Tailor Messaging
-- Reflect your community's values and culture
-- Adjust tone for local political climate
-
----
-
-## 💻 Technical Requirements
-
-### 🤖 AI System
-- Works with any AI accepting long-form prompts
-- **Recommended:** Claude Sonnet or Opus for best results
-- Can use API or chat interface
-
-### 🛠️ Skills Needed
-- Basic markdown editing
-- Web research (following links, reading documents)
-- Copy/paste and file organization
-- No coding required
-
-### ⏰ Time Commitment
-| Level | Hours/Week |
-|-------|------------|
-| Minimum | 2-3 hrs (daily scouts only) |
-| Recommended | 5-8 hrs (scouts + analysis) |
-| Full System | 10-15 hrs (includes synthesis and campaigns) |
-
----
-
-## ⚖️ Legal & Ethical Notes
-
-### ✅ This System is Legal
-- Uses only publicly available information
-- Exercises First Amendment rights to monitor government
-- Public records requests are a protected legal right
-
-### 🤝 Use Responsibly
-- Stick to facts, cite sources
-- Distinguish facts from opinions/interpretations
-- Avoid defamation (don't make false claims)
-- Recognize that people can have multiple roles without impropriety
-- Goal is transparency and accountability, not personal attacks
-
-### ❓ When in Doubt
-- Consult an attorney before publishing allegations of wrongdoing
-- Have experts review technical claims
-- Use "according to documents" language
-
----
-
-## 🙏 Acknowledgments
-
-This system stands on the shoulders of those who came before:
-
-**Marian Havlik** — "The Clam Lady," who successfully challenged the U.S. Army Corps of Engineers over endangered species protection. Her values of courage, long-term commitment, and willingness to challenge powerful institutions inspire this work.
-
-**Our Alachua Water** — Coalition partners in water protection whose collaboration strengthens this effort.
-
-**Justin Tabor** — Resigned city planner whose whistleblowing exposed the need for systematic monitoring of government accountability.
-
-**All citizen advocates** — Who show up to meetings, submit comments, file records requests, and hold power accountable. This system exists to multiply your effectiveness.
-
----
-
-## 📜 Version History
-
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | January 2026 | Initial release: 10 core prompts, configured for Alachua FL, karst/aquifer protection focus |
+**Priority Areas:**
+- Government portal scrapers (new sources)
+- PDF extraction improvements
+- Newsletter template design
+- Documentation and testing
 
 ---
 
@@ -474,10 +381,14 @@ This system stands on the shoulders of those who came before:
 
 **Project Lead:** Hans  
 **Coalition:** Our Alachua Water  
-**Publication:** [Substack]
+**Repository:** [github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio](https://github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio)
 
 ---
 
-*"The health of our democracy depends on informed, engaged citizens. These tools exist to lower the barriers to civic participation and ensure that public decisions serve public interests."*
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
 
 **Let's protect our water, our community, and our democracy. 💧🌍✊**
