@@ -111,7 +111,7 @@ graph LR
 
     subgraph Orchestration["🔀 Orchestration"]
         LG[LangGraph<br/>Multi-Agent Workflows]
-        APS[APScheduler<br/>Cron Jobs]
+        CEL[Celery + Beat<br/>Distributed Tasks]
     end
 
     subgraph AI["🧠 AI/ML"]
@@ -125,17 +125,16 @@ graph LR
         STORE[(Supabase Storage<br/>PDF Archive)]
     end
 
-    subgraph Scraping["🕷️ Web Scraping (Firecrawl)"]
-        SCRAPE[Scrape<br/>Single URL → Markdown]
-        MAP[Map<br/>Discover All URLs]
-        BATCH[Batch Scrape<br/>Multiple URLs]
-        ACTIONS[Actions<br/>Click/Scroll/Wait]
+    subgraph Scraping["🕷️ Data Ingestion"]
+        FC[Firecrawl<br/>Web Scraping]
+        DOC[Docling<br/>PDF Parsing]
+        CHUNK[LangChain<br/>Text Splitting]
     end
 
     FAST --> LG
     LG --> GEM & TAV
     LG --> SUP
-    APS --> LG
+    CEL --> LG
     Scraping --> LG
     GEM --> EMB --> SUP
 ```
@@ -144,13 +143,14 @@ graph LR
 |:----------|:-----------|:--------|
 | **Web Server** | FastAPI + Uvicorn | REST API, SSE streaming, approval endpoints |
 | **Orchestration** | LangGraph | Multi-agent workflows with human-in-the-loop |
-| **Scheduling** | APScheduler | Daily/weekly/monthly cron triggers |
+| **Scheduling** | Celery + Celery Beat | Distributed task queue with cron scheduling |
 | **LLM** | Gemini 2.5 Pro & Flash | Pro for reasoning, Flash for extraction |
 | **Search** | Tavily | AI-optimized web research |
 | **Database** | Supabase (PostgreSQL) | Structured data, JSONB, pgvector |
 | **Document Storage** | Supabase Storage | PDF archive with full traceability |
 | **Validation** | Pydantic v2 | Strict schemas for all data |
-| **Scraping** | Firecrawl | LLM-ready markdown, JS rendering, PDF parsing, batch operations |
+| **Web Scraping** | Firecrawl | LLM-ready markdown, JS rendering, batch operations |
+| **Document Parsing** | Docling | PDF/DOCX parsing, table extraction, layout understanding |
 
 ---
 
@@ -158,10 +158,10 @@ graph LR
 
 ```mermaid
 sequenceDiagram
-    participant CRON as ⏰ Scheduler
+    participant CRON as ⏰ Celery Beat
     participant SCOUT as 🔍 Scout Agent
     participant SRC as 🌐 CivicClerk
-    participant PDF as 📄 PDF Processor
+    participant PDF as 📄 Docling
     participant DB as 💾 Supabase
     participant ANALYST as 🧠 Analyst Agent
     participant HUMAN as 👤 Human Reviewer
@@ -275,7 +275,45 @@ result = firecrawl.scrape(
 
 ---
 
-## �📁 Project Structure
+## 📄 Docling Integration
+
+For PDF and document parsing, we use **[Docling](https://github.com/docling-project/docling)** (IBM's open-source document processor). Docling excels at extracting structured content from complex government documents.
+
+### Why Docling?
+
+| Challenge | Docling Solution |
+|:----------|:-----------------|
+| **Complex PDF layouts** | Advanced layout understanding, reading order detection |
+| **Tables in staff reports** | Structure-preserving table extraction |
+| **Multi-format support** | PDF, DOCX, PPTX, HTML, images |
+| **Scanned documents** | Built-in OCR support |
+| **Data privacy** | 100% local execution (no API calls) |
+
+### Usage with LangChain
+
+```python
+from docling.document_converter import DocumentConverter
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+
+# 1. Parse PDF with Docling
+converter = DocumentConverter()
+result = converter.convert("staff_report.pdf")
+markdown = result.document.export_to_markdown()
+
+# 2. Chunk with LangChain
+splitter = RecursiveCharacterTextSplitter(
+    chunk_size=512,
+    chunk_overlap=50,
+    separators=["\n\n", "\n", ". ", " "]
+)
+chunks = splitter.split_text(markdown)
+
+# 3. Ready for embedding and storage
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 alachua-civic-intelligence-reporting-studio/
@@ -309,13 +347,14 @@ alachua-civic-intelligence-reporting-studio/
 │   │
 │   ├── tools/
 │   │   ├── firecrawl_client.py     # Firecrawl wrapper with retry logic
+│   │   ├── docling_processor.py    # Docling PDF/DOCX parsing + chunking
 │   │   ├── civicclerk_scraper.py   # CivicClerk-specific scraping patterns
-│   │   ├── pdf_processor.py        # Firecrawl PDF + Gemini hybrid
 │   │   └── document_storage.py     # Supabase file management
 │   │
-│   └── scheduler/
-│       ├── manager.py              # APScheduler setup
-│       └── jobs.py                 # Scheduled task definitions
+│   └── tasks/
+│       ├── celery_app.py           # Celery application configuration
+│       ├── beat_schedule.py        # Celery Beat periodic task schedule
+│       └── scout_tasks.py          # Scout agent task definitions
 │
 ├── prompt_library/                 # Agent prompt templates
 │   ├── config/                     # Legacy source registry docs
@@ -502,7 +541,8 @@ Full registry: [`prompt_library/config/source-registry.md`](prompt_library/confi
 ### Prerequisites
 
 - Python 3.10+
-- Docker (optional, for local Supabase)
+- **Redis** - Message broker for Celery ([install](https://redis.io/docs/getting-started/))
+- Docker (optional, for local Supabase and Redis)
 - API keys:
   - **Firecrawl** - Web scraping ([get key](https://firecrawl.dev)) - Free tier: 500 credits
   - **Google AI (Gemini)** - LLM analysis ([get key](https://aistudio.google.com))
@@ -539,16 +579,36 @@ FIRECRAWL_API_KEY=your_firecrawl_key
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_KEY=your_supabase_anon_key
 SUPABASE_DB_URL=postgresql://postgres:password@db.your-project.supabase.co:5432/postgres
+
+# Celery / Redis
+CELERY_BROKER_URL=redis://localhost:6379/0
+CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 ### Running the Server
 
 ```bash
-# Start the FastAPI server
+# 1. Start Redis (if not using Docker)
+redis-server
+
+# 2. Start the Celery worker (in a separate terminal)
+celery -A src.tasks.celery_app worker --loglevel=info
+
+# 3. Start Celery Beat scheduler (in a separate terminal)
+celery -A src.tasks.celery_app beat --loglevel=info
+
+# 4. Start the FastAPI server
 uvicorn src.main:app --reload --port 8000
 
 # The API will be available at http://localhost:8000
 # Docs at http://localhost:8000/docs
+```
+
+### Docker Compose (Recommended)
+
+```bash
+# Start all services (Redis, Celery worker, Celery Beat, FastAPI)
+docker-compose up -d
 ```
 
 ### Running Agents Manually

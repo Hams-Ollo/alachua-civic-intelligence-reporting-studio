@@ -1,16 +1,26 @@
+# Core Framework
+fastapi
+uvicorn[standard]
+sse-starlette
+
+# LLM & Orchestration
 langchain
 langchain-google-genai
 langgraph
-pydantic
-python-dotenv
+
+# Task Queue
+celery[redis]
+redis
+
+# Data & Storage
 supabase
-tavily-python
-firecrawl-py
-beautifulsoup4
-requests
+pydantic
 pyyaml
-playwright
-apscheduler
-pdfplumber
-fastapi
-uvicorn
+python-dotenv
+
+# Web Scraping & Document Processing
+firecrawl-py
+docling
+
+# Research
+tavily-python
