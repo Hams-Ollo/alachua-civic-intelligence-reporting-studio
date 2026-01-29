@@ -15,7 +15,7 @@
 
 ## 🔴 P0 - Critical (Fix Immediately)
 
-### [ ] 1. Fix `src/tools.py` - Uses Removed Dependencies
+### [x] 1. Fix `src/tools.py` - Uses Removed Dependencies
 **File:** `src/tools.py`  
 **Issue:** Imports `requests` and `BeautifulSoup` which were removed from `requirements.txt`  
 **Impact:** Application crashes on import  
@@ -32,7 +32,7 @@ from firecrawl import Firecrawl
 
 ---
 
-### [ ] 2. Fix `src/models.py` - Invalid Gemini Model Names
+### [x] 2. Fix `src/models.py` - Invalid Gemini Model Names
 **File:** `src/models.py`  
 **Issue:** Uses non-existent model identifiers `gemini-3.0-pro` and `gemini-3.0-flash`  
 **Impact:** API calls fail  
@@ -50,7 +50,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 3. Fix `src/config.py` - Module-Level Crash
+### [x] 3. Fix `src/config.py` - Module-Level Crash
 **File:** `src/config.py` (lines 392-401)  
 **Issue:** Raises `ValueError` on import if `GOOGLE_API_KEY` not set  
 **Impact:** Cannot import any module that imports config without API key  
@@ -60,7 +60,7 @@ model="gemini-2.5-flash"
 
 ## 🟠 P1 - High Priority (Core Functionality)
 
-### [ ] 4. Delete `src/registry.py` - Redundant Source Registry
+### [x] 4. Delete `src/registry.py` - Redundant Source Registry
 **File:** `src/registry.py`  
 **Issue:** Hardcoded registry duplicates `config/sources.yaml`  
 **Impact:** Configuration drift, maintenance burden  
@@ -68,7 +68,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 5. Create `src/tools/firecrawl_client.py`
+### [x] 5. Create `src/tools/firecrawl_client.py`
 **Status:** File does not exist  
 **Required by:** README architecture, Scout agents  
 **Implementation:**
@@ -79,7 +79,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 6. Create `src/tools/docling_processor.py`
+### [x] 6. Create `src/tools/docling_processor.py`
 **Status:** File does not exist  
 **Required by:** README architecture, PDF processing  
 **Implementation:**
@@ -90,7 +90,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 7. Refactor `src/main.py` - Convert to FastAPI
+### [x] 7. Create `src/app.py` - FastAPI Application
 **File:** `src/main.py`  
 **Issue:** Currently CLI-only with `argparse`, README documents FastAPI server  
 **Solution:** Create proper FastAPI application with:
@@ -101,7 +101,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 8. Create `src/tasks/` Directory - Celery Integration
+### [x] 8. Create `src/tasks/` Directory - Celery Integration
 **Status:** Directory does not exist  
 **Required files:**
 - `src/tasks/__init__.py`
@@ -111,7 +111,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 9. Create `src/api/routes/` Directory - FastAPI Routes
+### [x] 9. Create `src/api/routes/` Directory - FastAPI Routes
 **Status:** Directory does not exist  
 **Required files:**
 - `src/api/__init__.py`
@@ -122,7 +122,7 @@ model="gemini-2.5-flash"
 
 ---
 
-### [ ] 10. Create `src/workflows/` Directory - LangGraph
+### [x] 10. Create `src/workflows/` Directory - LangGraph
 **Status:** Directory does not exist  
 **Required files:**
 - `src/workflows/__init__.py`
@@ -245,6 +245,36 @@ def get_db():
 **Completed:** 2026-01-29
 
 ### [x] Clean up requirements.txt
+**Completed:** 2026-01-29
+
+### [x] P0-1: Fix src/tools.py - Replace requests/bs4 with Firecrawl
+**Completed:** 2026-01-29
+
+### [x] P0-2: Fix src/models.py - Update Gemini model names to 2.5
+**Completed:** 2026-01-29
+
+### [x] P0-3: Fix src/config.py - Remove module-level crash
+**Completed:** 2026-01-29
+
+### [x] P1-4: Delete src/registry.py - Use YAML config instead
+**Completed:** 2026-01-29
+
+### [x] P1-5: Create src/tools/firecrawl_client.py
+**Completed:** 2026-01-29
+
+### [x] P1-6: Create src/tools/docling_processor.py
+**Completed:** 2026-01-29
+
+### [x] P1-7: Create src/app.py - FastAPI application
+**Completed:** 2026-01-29
+
+### [x] P1-8: Create src/tasks/ - Celery integration
+**Completed:** 2026-01-29
+
+### [x] P1-9: Create src/api/routes/ - FastAPI routes
+**Completed:** 2026-01-29
+
+### [x] P1-10: Create src/workflows/ - LangGraph workflows
 **Completed:** 2026-01-29
 
 ---

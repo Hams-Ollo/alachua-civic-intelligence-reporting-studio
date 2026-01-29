@@ -1,4 +1,4 @@
-# **Alachua Civic Intelligence Source Discovery: Architectural Blueprint for Automated Governance Monitoring**
+# **Open Sousveillance Studio Source Discovery: Architectural Blueprint for Automated Governance Monitoring**
 
 ## **1\. Executive Intelligence Summary**
 

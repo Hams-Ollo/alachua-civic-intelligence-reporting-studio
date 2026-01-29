@@ -1,12 +1,41 @@
-import requests
-from bs4 import BeautifulSoup
+"""
+Tools module for Alachua Civic Intelligence System.
+
+Provides LangChain tools for:
+- Web scraping via Firecrawl
+- Deep research via Tavily
+"""
+
+import os
 from typing import Optional
 from langchain_core.tools import tool
 from tavily import TavilyClient
-from src.config import TAVILY_API_KEY
+from firecrawl import Firecrawl
 
-# Initialize Tavily Client
-tavily_client = TavilyClient(api_key=TAVILY_API_KEY) if TAVILY_API_KEY else None
+# Initialize clients lazily to avoid import-time crashes
+_tavily_client: Optional[TavilyClient] = None
+_firecrawl_client: Optional[Firecrawl] = None
+
+
+def get_tavily_client() -> Optional[TavilyClient]:
+    """Get or create Tavily client."""
+    global _tavily_client
+    if _tavily_client is None:
+        api_key = os.getenv("TAVILY_API_KEY")
+        if api_key:
+            _tavily_client = TavilyClient(api_key=api_key)
+    return _tavily_client
+
+
+def get_firecrawl_client() -> Optional[Firecrawl]:
+    """Get or create Firecrawl client."""
+    global _firecrawl_client
+    if _firecrawl_client is None:
+        api_key = os.getenv("FIRECRAWL_API_KEY")
+        if api_key:
+            _firecrawl_client = Firecrawl(api_key=api_key)
+    return _firecrawl_client
+
 
 @tool
 def deep_research(query: str, max_results: int = 5) -> str:
@@ -14,47 +43,88 @@ def deep_research(query: str, max_results: int = 5) -> str:
     Performs a deep web search using Tavily to find recent news, documents, and connections.
     Use this for broad "Analyst" questions like "What is the connection between Tara Forest and Mill Creek?".
     """
-    if not tavily_client:
-        return "Error: Tavily API Key not configured."
+    client = get_tavily_client()
+    if not client:
+        return "Error: Tavily API Key not configured. Set TAVILY_API_KEY environment variable."
     
     try:
-        response = tavily_client.search(query, search_depth="advanced", max_results=max_results)
-        # Tavily returns a list of result objects. We'll format them as a string.
+        response = client.search(query, search_depth="advanced", max_results=max_results)
         results = []
         for r in response.get("results", []):
             results.append(f"Title: {r['title']}\nURL: {r['url']}\nContent: {r['content']}\n---")
-        return "\n".join(results)
+        return "\n".join(results) if results else "No results found."
     except Exception as e:
         return f"Search failed: {e}"
 
+
 @tool
-def monitor_url(url: str) -> str:
+def monitor_url(url: str, wait_time: int = 2000) -> str:
     """
-    Fetches the text content of a specific URL. 
-    Use this for "Scout" tasks to read specific agendas or pages from the Source Registry.
+    Fetches the content of a URL using Firecrawl.
+    Handles JavaScript-rendered pages (React SPAs like CivicClerk).
+    Use this for "Scout" tasks to read specific agendas or pages.
+    
+    Args:
+        url: The URL to scrape
+        wait_time: Milliseconds to wait for JS rendering (default 2000ms)
     """
+    client = get_firecrawl_client()
+    if not client:
+        return "Error: Firecrawl API Key not configured. Set FIRECRAWL_API_KEY environment variable."
+    
     try:
-        # Basic User-Agent to avoid immediate blocking
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-        }
-        response = requests.get(url, headers=headers, timeout=10)
-        response.raise_for_status()
+        # Use Firecrawl with actions for JS-rendered content
+        result = client.scrape(
+            url,
+            formats=["markdown"],
+            actions=[
+                {"type": "wait", "milliseconds": wait_time},
+                {"type": "scroll", "direction": "down"}
+            ]
+        )
         
-        soup = BeautifulSoup(response.content, "html.parser")
+        # Extract markdown content
+        if hasattr(result, 'markdown'):
+            content = result.markdown
+        elif isinstance(result, dict):
+            content = result.get('markdown', result.get('content', str(result)))
+        else:
+            content = str(result)
         
-        # Simple text extraction - in Phase 2 we can swap this for Firecrawl
-        # Remove scripts and styles
-        for script in soup(["script", "style"]):
-            script.extract()
-            
-        text = soup.get_text()
+        # Truncate if needed for LLM context
+        return content[:50000] if content else "No content extracted."
         
-        # Clean up whitespace
-        lines = (line.strip() for line in text.splitlines())
-        chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-        clean_text = '\n'.join(chunk for chunk in chunks if chunk)
-        
-        return clean_text[:20000] # Truncate massive pages to fit context if needed
     except Exception as e:
         return f"Failed to fetch {url}: {e}"
+
+
+@tool
+def scrape_pdf(url: str) -> str:
+    """
+    Fetches and extracts text from a PDF URL using Firecrawl.
+    Use this for agenda packets, staff reports, and other PDF documents.
+    
+    Args:
+        url: Direct URL to a PDF file
+    """
+    client = get_firecrawl_client()
+    if not client:
+        return "Error: Firecrawl API Key not configured. Set FIRECRAWL_API_KEY environment variable."
+    
+    try:
+        result = client.scrape(
+            url,
+            formats=["markdown"]
+        )
+        
+        if hasattr(result, 'markdown'):
+            content = result.markdown
+        elif isinstance(result, dict):
+            content = result.get('markdown', result.get('content', str(result)))
+        else:
+            content = str(result)
+        
+        return content[:50000] if content else "No content extracted from PDF."
+        
+    except Exception as e:
+        return f"Failed to extract PDF from {url}: {e}"

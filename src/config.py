@@ -387,14 +387,14 @@ def clear_config_cache() -> None:
 # =============================================================================
 # LEGACY EXPORTS (for backwards compatibility)
 # =============================================================================
-# These will be deprecated in favor of the unified AppConfig
+# These are provided for backwards compatibility but should be accessed
+# via load_api_keys() or build_app_config() for proper validation.
+# No validation at import time to avoid crashes during testing/development.
 
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 TAVILY_API_KEY = os.getenv("TAVILY_API_KEY")
 FIRECRAWL_API_KEY = os.getenv("FIRECRAWL_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
-
-# Validate required key on import
-if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in environment variables.")
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
