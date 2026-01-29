@@ -8,3 +8,9 @@ tavily-python
 firecrawl-py
 beautifulsoup4
 requests
+pyyaml
+playwright
+apscheduler
+pdfplumber
+fastapi
+uvicorn

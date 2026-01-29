@@ -1,0 +1,397 @@
+# =============================================================================
+# OPEN SOUSVEILLANCE STUDIO - ENTITIES & WATCHLIST CONFIGURATION
+# =============================================================================
+# This file defines the specific entities, keywords, and topics to monitor.
+#
+# The system will:
+# - Flag documents containing these terms
+# - Track relationships between entities
+# - Assign urgency levels based on keyword context
+# - Build a knowledge graph over time
+#
+# Categories:
+# - projects: Development projects, construction, land use changes
+# - organizations: Companies, LLCs, advocacy groups, government bodies
+# - people: Key officials, developers, attorneys, experts
+# - locations: Specific sites, addresses, parcels, geographic features
+# - topics: Issue areas, policy domains, environmental concerns
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# PROJECTS
+# -----------------------------------------------------------------------------
+# Active development projects and initiatives being tracked.
+
+projects:
+  # Primary threat - Tara Development Portfolio
+  - id: "tara-portfolio"
+    name: "Tara Development Portfolio"
+    description: "Multi-phase residential development over Mill Creek Sink"
+    urgency: "red"
+    status: "active"
+    
+    # All known names/aliases for this project
+    aliases:
+      - "Tara Forest"
+      - "Tara Forest East"
+      - "Tara Forest West"
+      - "Tara Baywood"
+      - "Tara April"
+      - "Tara Phoenicia"
+      - "Tara Esmeralda"
+      - "Tara Larga"
+      - "Tara Verde"
+      - "Tara Vista"
+    
+    # Keywords that indicate relevance
+    keywords:
+      - "Tara"
+      - "Mill Creek"
+      - "PSE22-0002"  # Application number
+      - "580 acres"
+      - "1000 units"
+    
+    # Related entity IDs
+    related_organizations:
+      - "tara-forest-llc"
+    related_people:
+      - "sayed-moukhtara"
+    related_locations:
+      - "mill-creek-sink"
+    
+    # Tracking metadata
+    first_detected: "2021-06-15"
+    notes: |
+      Projects are being reviewed in "piecemeal fashion" despite being 
+      "inextricably intertwined" (per former City Manager Mike DaRoza, June 2022).
+      Apex Companies letter (Dec 23, 2025) found "insufficient geologic data."
+
+# -----------------------------------------------------------------------------
+# ORGANIZATIONS
+# -----------------------------------------------------------------------------
+# Companies, government bodies, and advocacy groups to track.
+
+organizations:
+  # Developers
+  - id: "tara-forest-llc"
+    name: "Tara Forest, LLC"
+    type: "developer"
+    urgency: "red"
+    aliases:
+      - "Tara Forest LLC"
+      - "Tara April LLC"
+    principals:
+      - "sayed-moukhtara"
+    keywords:
+      - "Tara Forest"
+      - "Tara April"
+    sunbiz_id: null  # Add when known
+    notes: "Primary development entity for Tara portfolio."
+
+  # Government bodies
+  - id: "city-of-alachua"
+    name: "City of Alachua"
+    type: "municipality"
+    urgency: "yellow"
+    aliases:
+      - "Alachua City"
+      - "City Commission"
+    keywords:
+      - "City of Alachua"
+      - "Alachua City Commission"
+    website: "https://www.cityofalachua.com"
+
+  - id: "alachua-county"
+    name: "Alachua County"
+    type: "county"
+    urgency: "yellow"
+    aliases:
+      - "BOCC"
+      - "Board of County Commissioners"
+    keywords:
+      - "Alachua County"
+      - "County Commission"
+    website: "https://alachuacounty.us"
+
+  - id: "srwmd"
+    name: "Suwannee River Water Management District"
+    type: "state_agency"
+    urgency: "yellow"
+    aliases:
+      - "SRWMD"
+      - "Suwannee River WMD"
+      - "Water Management District"
+    keywords:
+      - "SRWMD"
+      - "Suwannee River"
+      - "water management"
+    website: "https://www.mysuwanneeriver.com"
+
+  # Advocacy groups (allies)
+  - id: "our-alachua-water"
+    name: "Our Alachua Water"
+    type: "advocacy"
+    urgency: "green"
+    aliases:
+      - "OAW"
+    keywords:
+      - "Our Alachua Water"
+    notes: "Local coalition partner."
+
+  - id: "nss"
+    name: "National Speleological Society"
+    type: "advocacy"
+    urgency: "green"
+    aliases:
+      - "NSS"
+    keywords:
+      - "National Speleological Society"
+      - "NSS"
+      - "cave society"
+    notes: "Owns 8.58-acre preserve adjacent to Tara. Has legal standing."
+
+  - id: "our-santa-fe-river"
+    name: "Our Santa Fe River"
+    type: "advocacy"
+    urgency: "green"
+    aliases:
+      - "OSFR"
+    keywords:
+      - "Our Santa Fe River"
+      - "OSFR"
+    website: "https://oursantaferiver.org"
+
+# -----------------------------------------------------------------------------
+# PEOPLE
+# -----------------------------------------------------------------------------
+# Key individuals to track across documents.
+
+people:
+  # Developers
+  - id: "sayed-moukhtara"
+    name: "Sayed Moukhtara"
+    role: "Developer"
+    urgency: "red"
+    aliases:
+      - "Moukhtara"
+      - "S. Moukhtara"
+    organizations:
+      - "tara-forest-llc"
+    keywords:
+      - "Moukhtara"
+      - "Sayed"
+
+  # Former officials (potential conflicts)
+  - id: "justin-tabor"
+    name: "Justin Tabor"
+    role: "Former Planning Director"
+    urgency: "yellow"
+    aliases:
+      - "J. Tabor"
+    notes: "Former City Planning Director, now with developer's firm."
+    keywords:
+      - "Justin Tabor"
+      - "Tabor"
+
+  # Experts
+  - id: "bryan-buescher"
+    name: "Bryan Buescher"
+    role: "Water Quality Expert"
+    urgency: "green"
+    organizations:
+      - "our-alachua-water"
+    keywords:
+      - "Bryan Buescher"
+      - "Buescher"
+    notes: "Coalition partner. Documented nitrate levels 14x higher than SRWMD target."
+
+# -----------------------------------------------------------------------------
+# LOCATIONS
+# -----------------------------------------------------------------------------
+# Geographic features, parcels, and addresses of interest.
+
+locations:
+  - id: "mill-creek-sink"
+    name: "Mill Creek Sink"
+    type: "karst_feature"
+    urgency: "red"
+    aliases:
+      - "Mill Creek"
+      - "Mill Creek Sinkhole"
+    keywords:
+      - "Mill Creek Sink"
+      - "Mill Creek"
+      - "sinkhole"
+    coordinates:
+      lat: 29.7912
+      lon: -82.4912
+    notes: |
+      Major karst feature with caves extending to 215 feet depth.
+      12-day hydrologic connection to Hornsby Spring (dye trace documented).
+      Cave system hosts 30+ species of cave-adapted organisms (2022 ACEPD survey).
+
+  - id: "hornsby-spring"
+    name: "Hornsby Spring"
+    type: "spring"
+    urgency: "yellow"
+    aliases:
+      - "Hornsby"
+    keywords:
+      - "Hornsby Spring"
+      - "Hornsby"
+    notes: "Downstream of Mill Creek Sink. 12-day travel time via aquifer."
+
+  - id: "santa-fe-river"
+    name: "Santa Fe River"
+    type: "river"
+    urgency: "yellow"
+    keywords:
+      - "Santa Fe River"
+      - "Santa Fe"
+    notes: "Part of the Suwannee River basin. Fed by Floridan Aquifer springs."
+
+  - id: "floridan-aquifer"
+    name: "Floridan Aquifer"
+    type: "aquifer"
+    urgency: "red"
+    aliases:
+      - "Upper Floridan"
+      - "Floridan"
+    keywords:
+      - "Floridan Aquifer"
+      - "aquifer"
+      - "groundwater"
+    notes: "Primary drinking water source for North Central Florida. Unconfined in this area."
+
+# -----------------------------------------------------------------------------
+# TOPICS
+# -----------------------------------------------------------------------------
+# Issue areas and policy domains that trigger alerts.
+
+topics:
+  # Environmental
+  - id: "karst-geology"
+    name: "Karst Geology"
+    urgency: "red"
+    keywords:
+      - "karst"
+      - "sinkhole"
+      - "cave"
+      - "limestone"
+      - "dissolution"
+      - "geologic"
+    description: "Any mention of karst features, sinkholes, or geological assessments."
+
+  - id: "water-quality"
+    name: "Water Quality"
+    urgency: "red"
+    keywords:
+      - "nitrate"
+      - "nitrogen"
+      - "nutrient"
+      - "contamination"
+      - "pollution"
+      - "water quality"
+      - "MFL"
+      - "minimum flows"
+    description: "Water quality testing, contamination, nutrient loading."
+
+  - id: "stormwater"
+    name: "Stormwater Management"
+    urgency: "yellow"
+    keywords:
+      - "stormwater"
+      - "drainage"
+      - "retention"
+      - "detention"
+      - "runoff"
+      - "impervious"
+    description: "Stormwater infrastructure, drainage permits, flooding."
+
+  # Land Use
+  - id: "rezoning"
+    name: "Rezoning"
+    urgency: "red"
+    keywords:
+      - "rezone"
+      - "rezoning"
+      - "land use change"
+      - "future land use"
+      - "comprehensive plan amendment"
+      - "text amendment"
+    description: "Any zoning or comprehensive plan changes."
+
+  - id: "annexation"
+    name: "Annexation"
+    urgency: "red"
+    keywords:
+      - "annexation"
+      - "annex"
+      - "municipal boundary"
+      - "urban service area"
+    description: "City boundary expansion into county land."
+
+  - id: "special-exception"
+    name: "Special Exception"
+    urgency: "yellow"
+    keywords:
+      - "special exception"
+      - "variance"
+      - "conditional use"
+      - "quasi-judicial"
+    description: "Variances and special permits that bypass standard rules."
+
+  # Permits
+  - id: "erp"
+    name: "Environmental Resource Permit"
+    urgency: "red"
+    keywords:
+      - "ERP"
+      - "environmental resource permit"
+      - "wetland"
+      - "wetlands"
+    description: "State environmental permits for land alteration."
+
+  - id: "consumptive-use"
+    name: "Consumptive Use Permit"
+    urgency: "red"
+    keywords:
+      - "consumptive use"
+      - "water use permit"
+      - "WUP"
+      - "withdrawal"
+    description: "Permits for large-scale water extraction."
+
+# -----------------------------------------------------------------------------
+# ALERT RULES
+# -----------------------------------------------------------------------------
+# Custom rules for escalating urgency based on keyword combinations.
+
+alert_rules:
+  - name: "Tara + Public Hearing"
+    description: "Immediate alert when Tara project has a scheduled hearing"
+    conditions:
+      all:
+        - projects: ["tara-portfolio"]
+        - keywords: ["public hearing", "quasi-judicial", "commission meeting"]
+    urgency: "red"
+    action: "notify_immediately"
+
+  - name: "New Sinkhole Activity"
+    description: "Alert on any new sinkhole reports in the area"
+    conditions:
+      any:
+        - keywords: ["sinkhole", "subsidence", "collapse"]
+    urgency: "red"
+    action: "flag_for_review"
+
+  - name: "Permit Issuance"
+    description: "Alert when permits are issued (not just applied for)"
+    conditions:
+      all:
+        - keywords: ["permit issued", "notice of intent", "approved"]
+        - any:
+            - projects: ["tara-portfolio"]
+            - organizations: ["tara-forest-llc"]
+    urgency: "red"
+    action: "notify_immediately"

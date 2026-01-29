@@ -1,17 +1,17 @@
-# 🏛️ Alachua Civic Intelligence System
+# 👁️ Open Sousveillance Studio
 
-**An AI-powered local government accountability monitoring platform**
+**AI-powered civic intelligence. Watching from below.**
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![LangGraph](https://img.shields.io/badge/orchestration-LangGraph-orange.svg)](https://langchain-ai.github.io/langgraph/)
 [![Supabase](https://img.shields.io/badge/database-Supabase-green.svg)](https://supabase.com/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-**Location:** 📍 City of Alachua, Alachua County, Florida, USA  
-**Version:** 2.0 (Automated Architecture)  
-**Status:** 🚧 Active Development
+**Version:** 2.0  
+**Status:** 🚧 Active Development  
+**Origin:** 📍 Alachua County, Florida — Built to protect the Floridan Aquifer
 
-> *"Understanding systems is the path to freedom."*
+> *"Sousveillance"* (French: sous "from below" + veillance "watching") — the recording of an activity by a participant, in contrast to surveillance, which is done by an authority. **They watched us. Now we watch back.**
 
 ---
 
@@ -28,7 +28,9 @@ This system exists to ensure **no civic action goes unnoticed**.
 
 ## 💡 The Solution
 
-An automated **AI agent system** that continuously monitors 15+ government data sources, detects new documents within hours of publication, extracts actionable intelligence, and generates weekly reports for community distribution.
+**Open Sousveillance Studio** is an open-source AI agent platform that flips the surveillance paradigm. While governments have long monitored citizens, this system empowers citizens to monitor government — automatically, continuously, and intelligently.
+
+The platform deploys AI agents that watch 15+ government data sources, detect new documents within hours of publication, extract actionable intelligence, and generate weekly reports for community distribution.
 
 ```mermaid
 flowchart TB
@@ -192,9 +194,14 @@ sequenceDiagram
 
 ```
 alachua-civic-intelligence-reporting-studio/
+├── config/                         # ⭐ YAML CONFIGURATION (customize for your community)
+│   ├── instance.yaml               # Instance identity, jurisdiction, scheduling
+│   ├── sources.yaml                # Government data sources to monitor
+│   └── entities.yaml               # Watchlist: projects, orgs, keywords
+│
 ├── src/
 │   ├── main.py                     # FastAPI application entry point
-│   ├── config.py                   # Environment configuration
+│   ├── config.py                   # Configuration loader (YAML + Pydantic)
 │   ├── database.py                 # Supabase client
 │   ├── schemas.py                  # Pydantic models
 │   ├── registry.py                 # Source URL registry
@@ -225,7 +232,7 @@ alachua-civic-intelligence-reporting-studio/
 │       └── jobs.py                 # Scheduled task definitions
 │
 ├── prompt_library/                 # Agent prompt templates
-│   ├── config/                     # Source registry, geographic scope
+│   ├── config/                     # Legacy source registry docs
 │   ├── layer-1-scouts/             # A1-A4 prompts
 │   ├── layer-2-analysts/           # B1-B2 prompts
 │   └── layer-3-synthesizers/       # C1-C4 prompts
@@ -246,7 +253,149 @@ alachua-civic-intelligence-reporting-studio/
 
 ---
 
-## 🌐 Monitored Data Sources
+## ⚙️ Configuration System
+
+Open Sousveillance Studio uses a **modular YAML configuration system** that makes it easy to deploy for any US municipality without code changes.
+
+### Configuration Files
+
+| File | Purpose | Key Settings |
+|:-----|:--------|:-------------|
+| `config/instance.yaml` | Your deployment identity | Instance name, jurisdiction hierarchy, timezone, schedules |
+| `config/sources.yaml` | Government data sources | URLs, scraping methods, document types, board filters |
+| `config/entities.yaml` | Watchlist items | Projects, organizations, people, keywords to monitor |
+
+### Instance Configuration (`instance.yaml`)
+
+Define your community and scheduling:
+
+```yaml
+instance:
+  id: "alachua-fl"
+  name: "Alachua County Civic Watch"
+  timezone: "America/New_York"
+  operator:
+    name: "Our Alachua Water Coalition"
+    email: "contact@ouralachuawater.org"
+
+jurisdiction:
+  country: "US"
+  state: "FL"
+  county: "Alachua"
+  municipalities:
+    - name: "City of Alachua"
+      primary: true
+    - name: "City of High Springs"
+      primary: false
+
+schedule:
+  scouts:
+    enabled: true
+    cron: "0 6 * * *"  # Daily at 6 AM
+  analysts:
+    enabled: true
+    cron: "0 9 * * 1"  # Weekly on Monday
+    requires_approval: true
+```
+
+### Sources Configuration (`sources.yaml`)
+
+Define government portals organized by tier:
+
+```yaml
+tier_1_municipal:
+  - id: "alachua-civicclerk"
+    name: "City of Alachua - Meeting Portal"
+    url: "https://alachuafl.portal.civicclerk.com/"
+    platform: "civicclerk"
+    priority: "critical"
+    scraping:
+      method: "playwright"
+      requires_javascript: true
+      wait_for_selector: ".meeting-list"
+    document_types:
+      - "agenda"
+      - "minutes"
+    boards:
+      - name: "City Commission"
+        keywords: ["commission"]
+        priority: "critical"
+
+tier_2_county:
+  - id: "alachua-county-escribe"
+    name: "Alachua County - Meeting Portal"
+    url: "https://pub-alachuacounty.escribemeetings.com/"
+    # ...
+```
+
+### Entities Configuration (`entities.yaml`)
+
+Define what to watch for:
+
+```yaml
+projects:
+  - id: "tara-portfolio"
+    name: "Tara Development Portfolio"
+    urgency: "red"
+    aliases:
+      - "Tara Forest"
+      - "Tara Baywood"
+    keywords:
+      - "Mill Creek"
+      - "PSE22-0002"
+
+organizations:
+  - id: "tara-forest-llc"
+    name: "Tara Forest, LLC"
+    type: "developer"
+    urgency: "red"
+
+keywords:
+  environmental:
+    - "aquifer"
+    - "karst"
+    - "sinkhole"
+    - "stormwater"
+  procedural:
+    - "variance"
+    - "waiver"
+    - "public hearing"
+```
+
+### Using Configuration in Code
+
+```python
+from src.config import (
+    build_app_config,
+    get_all_sources,
+    get_sources_by_priority,
+    get_projects,
+    get_all_keywords,
+)
+
+# Load complete configuration
+config = build_app_config()
+print(config.instance.name)  # "Alachua County Civic Watch"
+print(config.jurisdiction.state)  # "FL"
+
+# Get all sources across all tiers
+sources = get_all_sources()
+for source in sources:
+    print(f"{source.name}: {source.url}")
+
+# Filter by priority
+critical_sources = get_sources_by_priority("critical")
+
+# Get watchlist items
+projects = get_projects()
+keywords = get_all_keywords()  # Deduplicated set for text matching
+```
+
+---
+
+## 🌐 Monitored Data Sources (Example: Alachua County, FL)
+
+Open Sousveillance Studio is designed to be **location-agnostic**. The source registry can be configured for any municipality. Below is the default configuration for Alachua County, Florida:
 
 | Tier | Source | Platform | Priority | Scraping Method |
 |:-----|:-------|:---------|:---------|:----------------|
@@ -274,8 +423,8 @@ Full registry: [`prompt_library/config/source-registry.md`](prompt_library/confi
 
 ```bash
 # Clone the repository
-git clone https://github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio.git
-cd alachua-civic-intelligence-reporting-studio
+git clone https://github.com/Hams-Ollo/open-sousveillance-studio.git
+cd open-sousveillance-studio
 
 # Create virtual environment
 python -m venv .venv
@@ -377,11 +526,69 @@ We welcome contributions! Please see [`docs/DEVELOPER_GUIDE.md`](docs/DEVELOPER_
 
 ---
 
+## 🌍 Adopt for Your Community
+
+Open Sousveillance Studio is designed to be forked and adapted for **any US municipality** with zero code changes. The YAML configuration system makes this simple:
+
+### Quick Start for Your City
+
+1. **Fork this repository**
+
+2. **Configure your instance** (`config/instance.yaml`):
+   ```yaml
+   instance:
+     id: "yourtown-tx"
+     name: "Your Town Civic Watch"
+     timezone: "America/Chicago"
+   
+   jurisdiction:
+     state: "TX"
+     county: "Your County"
+     municipalities:
+       - name: "City of Your Town"
+         primary: true
+   ```
+
+3. **Add your government sources** (`config/sources.yaml`):
+   - Find your city's meeting portal (CivicClerk, eScribe, Granicus, etc.)
+   - Add county commission URLs
+   - Include relevant state agencies
+
+4. **Define your watchlist** (`config/entities.yaml`):
+   - Add local development projects of concern
+   - List developers and organizations to track
+   - Define keywords relevant to your issues
+
+5. **Deploy and start watching!**
+
+### Common Government Portal Platforms
+
+| Platform | Common In | Scraping Method |
+|:---------|:----------|:----------------|
+| **CivicClerk** | Small/mid cities | Playwright (React SPA) |
+| **eScribe** | Counties, larger cities | Playwright + PDF download |
+| **Granicus** | Large cities | BeautifulSoup or API |
+| **Legistar** | Major metros | REST API |
+| **BoardDocs** | School boards | Playwright |
+
+### Example Configurations
+
+We welcome community contributions of configurations for other jurisdictions:
+- `config/examples/gainesville-fl/` - Gainesville, FL
+- `config/examples/austin-tx/` - Austin, TX  
+- `config/examples/seattle-wa/` - Seattle, WA
+
+**Share your config!** Open a PR to add your city's configuration to help others get started.
+
+We'd love to hear how you're using this tool. Open an issue or PR to share your experience!
+
+---
+
 ## 📧 Contact
 
 **Project Lead:** Hans  
-**Coalition:** Our Alachua Water  
-**Repository:** [github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio](https://github.com/Hams-Ollo/alachua-civic-intelligence-reporting-studio)
+**Origin Coalition:** Our Alachua Water  
+**Repository:** [github.com/Hams-Ollo/open-sousveillance-studio](https://github.com/Hams-Ollo/open-sousveillance-studio)
 
 ---
 
@@ -391,4 +598,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Let's protect our water, our community, and our democracy. 💧🌍✊**
+**They watched us. Now we watch back. 👁️✊**

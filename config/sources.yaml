@@ -1,0 +1,356 @@
+# =============================================================================
+# OPEN SOUSVEILLANCE STUDIO - DATA SOURCES CONFIGURATION
+# =============================================================================
+# This file defines all government data sources to monitor for your instance.
+#
+# Each source specifies:
+# - What to scrape (URL, selectors)
+# - How to scrape it (method, authentication)
+# - When to check (priority determines frequency)
+# - What to extract (document types, keywords)
+#
+# Sources are organized by TIER (scope) to help prioritize and understand
+# which level of government is responsible.
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# TIER 1: MUNICIPAL (City/Town Level)
+# -----------------------------------------------------------------------------
+# These are typically the most granular and most impactful for local issues.
+# City councils, planning boards, zoning hearings.
+
+tier_1_municipal:
+  # -------------------------
+  # CITY OF ALACHUA (Primary)
+  # -------------------------
+  - id: "alachua-civicclerk"
+    name: "City of Alachua - Meeting Portal"
+    description: "Official agendas, minutes, and video archives for City Commission and boards"
+    
+    # Source identification
+    jurisdiction: "City of Alachua"
+    url: "https://alachuafl.portal.civicclerk.com/"
+    platform: "civicclerk"  # Helps select the right scraper
+    
+    # Monitoring configuration
+    priority: "critical"  # critical, high, medium, low
+    check_frequency: "daily"
+    
+    # Scraping configuration
+    scraping:
+      method: "playwright"  # playwright, beautifulsoup, firecrawl, api
+      requires_javascript: true
+      wait_for_selector: ".meeting-list"
+      intercept_api: true  # Try to capture XHR/fetch calls
+      
+    # What document types to extract
+    document_types:
+      - "agenda"
+      - "agenda_packet"
+      - "minutes"
+      - "resolution"
+      - "ordinance"
+    
+    # Boards/committees to monitor (filter on scrape)
+    boards:
+      - name: "City Commission"
+        keywords: ["commission", "city commission"]
+        priority: "critical"
+      - name: "Planning and Zoning Board"
+        keywords: ["planning", "zoning", "PZB"]
+        priority: "critical"
+      - name: "Community Redevelopment Agency"
+        keywords: ["CRA", "redevelopment"]
+        priority: "high"
+    
+    # Notes for maintainers
+    notes: |
+      CivicClerk is a React SPA. Use Playwright to wait for content load.
+      The internal API returns JSON - intercept for structured data.
+
+  - id: "alachua-calendar"
+    name: "City of Alachua - Event Calendar"
+    description: "Upcoming meetings and public events"
+    jurisdiction: "City of Alachua"
+    url: "https://www.cityofalachua.com/government/global-pages/calendar-month-view"
+    platform: "granicus"
+    priority: "high"
+    check_frequency: "daily"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "calendar_event"
+    notes: "Lightweight HTML scrape. Cross-reference with CivicClerk for agenda details."
+
+  - id: "alachua-development-map"
+    name: "City of Alachua - Development Projects Map"
+    description: "Interactive map of proposed, approved, and active development projects"
+    jurisdiction: "City of Alachua"
+    url: "https://www.cityofalachua.com/government/planning-community-development/planning-zoning/land-use-map"
+    platform: "arcgis_embed"
+    priority: "critical"
+    check_frequency: "weekly"
+    scraping:
+      method: "firecrawl"
+      requires_javascript: true
+    document_types:
+      - "project_listing"
+    notes: "Embedded ArcGIS map. May need to hit the underlying REST service for JSON data."
+
+# -----------------------------------------------------------------------------
+# TIER 2: COUNTY LEVEL
+# -----------------------------------------------------------------------------
+# County commissions, environmental boards, development review committees.
+# Often have stricter environmental standards than state minimums.
+
+tier_2_county:
+  - id: "alachua-county-escribe"
+    name: "Alachua County - Meeting Portal"
+    description: "Board of County Commissioners and advisory boards"
+    jurisdiction: "Alachua County"
+    url: "https://pub-alachuacounty.escribemeetings.com/"
+    platform: "escribe"
+    priority: "critical"
+    check_frequency: "daily"
+    scraping:
+      method: "playwright"
+      requires_javascript: true
+      wait_for_selector: ".meeting-item"
+    document_types:
+      - "agenda"
+      - "agenda_packet"
+      - "minutes"
+    boards:
+      - name: "Board of County Commissioners"
+        keywords: ["BOCC", "county commission"]
+        priority: "critical"
+      - name: "Development Review Committee"
+        keywords: ["DRC", "development review"]
+        priority: "critical"
+      - name: "Environmental Protection Advisory Committee"
+        keywords: ["EPAC", "environmental"]
+        priority: "high"
+      - name: "Planning Commission"
+        keywords: ["planning commission"]
+        priority: "high"
+    notes: |
+      eScribe provides PDF download links directly. 
+      Watch for Joint Meetings with City of Alachua.
+
+  - id: "alachua-county-mapgenius"
+    name: "Alachua County - Map Genius"
+    description: "County-wide development project tracker and GIS"
+    jurisdiction: "Alachua County"
+    url: "https://mapgenius.alachuacounty.us/development-projects/"
+    platform: "custom"
+    priority: "critical"
+    check_frequency: "weekly"
+    scraping:
+      method: "playwright"
+      requires_javascript: true
+    document_types:
+      - "project_listing"
+      - "permit_application"
+    notes: "Lists all Tara phases (Esmeralda, Larga, Verde, Vista). The left panel is dynamically loaded."
+
+  - id: "alachua-county-epd"
+    name: "Alachua County - Environmental Protection Department"
+    description: "Environmental regulations and monitoring data"
+    jurisdiction: "Alachua County"
+    url: "https://alachuacounty.us/Depts/epd/Pages/EPD.aspx"
+    platform: "sharepoint"
+    priority: "high"
+    check_frequency: "weekly"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "report"
+      - "policy_document"
+
+# -----------------------------------------------------------------------------
+# TIER 3: REGIONAL/STATE (Water Management, DEP, DOT)
+# -----------------------------------------------------------------------------
+# State agencies that issue permits for water use, environmental impact,
+# and transportation access. Often the "upstream" approval before local permits.
+
+tier_3_regional:
+  - id: "srwmd-permits"
+    name: "Suwannee River Water Management District - Permits"
+    description: "Environmental Resource Permits (ERP) and Water Use Permits (WUP)"
+    jurisdiction: "SRWMD (Regional)"
+    url: "https://www.mysuwanneeriver.com/8/Permits-Rules"
+    platform: "civicplus"
+    priority: "critical"
+    check_frequency: "daily"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "permit_application"
+      - "permit_issuance"
+      - "notice_of_intent"
+    # Specific search terms to use on the e-permitting portal
+    search_terms:
+      - "Tara Forest"
+      - "Sayed Moukhtara"
+      - "Mill Creek"
+      - "City of Alachua"
+    notes: |
+      The e-permitting portal is at https://permitting.sjrwmd.com/srep/#/ep
+      Pre-application meetings are logged here - earliest signal of new projects.
+
+  - id: "fdep-oculus"
+    name: "Florida DEP - Oculus Document System"
+    description: "State environmental permits and compliance documents"
+    jurisdiction: "State of Florida"
+    url: "https://floridadep.gov/water/submerged-lands-environmental-resources-coordination/content/finding-erp-permit-dep-internet"
+    platform: "custom"
+    priority: "high"
+    check_frequency: "weekly"
+    scraping:
+      method: "playwright"  # Complex session-based search
+      requires_javascript: true
+    document_types:
+      - "permit"
+      - "compliance_report"
+    notes: "Oculus is difficult to scrape. Use the Nexus portal as a friendlier frontend."
+
+  - id: "fdot-district2"
+    name: "FDOT District 2 - Project List"
+    description: "State road projects affecting I-75 and US-441 corridors"
+    jurisdiction: "State of Florida"
+    url: "https://nflroads.com/ProjectList.aspx?r=6713"
+    platform: "custom"
+    priority: "medium"
+    check_frequency: "weekly"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "project_listing"
+    notes: "Access management permits for development driveways are tracked here."
+
+# -----------------------------------------------------------------------------
+# TIER 4: LEGAL NOTICES & PUBLIC RECORDS
+# -----------------------------------------------------------------------------
+# Official legal notices, court filings, corporate registrations.
+# These are often the "safety net" that catches things missed elsewhere.
+
+tier_4_legal:
+  - id: "florida-public-notices"
+    name: "Florida Public Notices - Statewide Repository"
+    description: "Legal notices from all certified Florida newspapers"
+    jurisdiction: "State of Florida"
+    url: "https://floridapublicnotices.com/"
+    platform: "custom"
+    priority: "critical"
+    check_frequency: "daily"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+      # Filter parameters to apply
+      filters:
+        county: "Alachua"
+        date_range: "35_days"  # Default view
+    document_types:
+      - "public_notice"
+      - "legal_notice"
+      - "hearing_notice"
+    notes: |
+      Filter by Alachua County using the dropdown.
+      This is the certified catch-all for all legally required notices.
+
+  - id: "mainstreet-notices"
+    name: "Mainstreet Daily News - Public Notices"
+    description: "Local certified publisher for Alachua County"
+    jurisdiction: "Alachua County"
+    url: "https://www.mainstreetdailynews.com/public-notices"
+    platform: "wordpress"
+    priority: "critical"
+    check_frequency: "daily"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "public_notice"
+    notes: "Redirects to Column.us for notice browsing. Primary local publisher."
+
+  - id: "sunbiz"
+    name: "Florida Sunbiz - Corporate Registry"
+    description: "Business entity registrations and annual reports"
+    jurisdiction: "State of Florida"
+    url: "https://search.sunbiz.org/Inquiry/CorporationSearch/ByName"
+    platform: "custom"
+    priority: "high"
+    check_frequency: "weekly"
+    scraping:
+      method: "playwright"
+      requires_javascript: true
+    document_types:
+      - "corporate_filing"
+    # Entities to track for new filings
+    search_terms:
+      - "Tara Forest"
+      - "Tara April"
+      - "Moukhtara"
+    notes: "Track shell LLCs. New entities at the developer's address signal new phases."
+
+  - id: "alachua-clerk"
+    name: "Alachua County Clerk - Court Records"
+    description: "Civil litigation, property records, liens"
+    jurisdiction: "Alachua County"
+    url: "https://www.alachuaclerk.org/court_records/index.cfm"
+    platform: "custom"
+    priority: "high"
+    check_frequency: "weekly"
+    scraping:
+      method: "playwright"
+      requires_javascript: true
+    document_types:
+      - "court_filing"
+      - "property_record"
+    search_terms:
+      - plaintiff: "Sierra Club"
+      - defendant: "City of Alachua"
+      - defendant: "Tara"
+    notes: "Track environmental litigation and challenges to development approvals."
+
+# -----------------------------------------------------------------------------
+# TIER 5: NEWS & CIVIC ORGANIZATIONS
+# -----------------------------------------------------------------------------
+# Media outlets and advocacy groups that often break stories or provide
+# analysis not found in official government sources.
+
+tier_5_civic:
+  - id: "wuft-environment"
+    name: "WUFT News - Environment Section"
+    description: "Public media coverage of environmental issues"
+    jurisdiction: "North Central Florida"
+    url: "https://www.wuft.org/environment"
+    platform: "wordpress"
+    priority: "high"
+    check_frequency: "daily"
+    scraping:
+      method: "rss"  # Has RSS feed
+      rss_url: "https://www.wuft.org/environment/feed/"
+    document_types:
+      - "news_article"
+    notes: "Excellent coverage of springs issues and Tara development."
+
+  - id: "our-santa-fe-river"
+    name: "Our Santa Fe River"
+    description: "Environmental advocacy group focused on springs protection"
+    jurisdiction: "Santa Fe River Basin"
+    url: "https://oursantaferiver.org/"
+    platform: "wordpress"
+    priority: "high"
+    check_frequency: "weekly"
+    scraping:
+      method: "beautifulsoup"
+      requires_javascript: false
+    document_types:
+      - "blog_post"
+      - "research_report"
+    notes: "Often has technical analysis before government reports."
