@@ -258,10 +258,24 @@ def display_scout_result(result):
     if alerts:
         st.subheader("🚨 Alerts")
         for alert in alerts:
-            with st.expander(f"**{alert.title}** - {alert.urgency}", expanded=True):
-                st.write(alert.description)
-                if alert.keywords_matched:
-                    st.caption(f"Keywords: {', '.join(alert.keywords_matched)}")
+            level = getattr(alert, 'level', 'UNKNOWN')
+            action_item = getattr(alert, 'action_item', 'No action specified')
+            context = getattr(alert, 'context', '')
+            deadline = getattr(alert, 'deadline', None)
+            
+            # Color code by level
+            if level == "RED" or str(level) == "UrgencyLevel.RED":
+                icon = "🔴"
+            elif level == "YELLOW" or str(level) == "UrgencyLevel.YELLOW":
+                icon = "🟡"
+            else:
+                icon = "🟢"
+            
+            with st.expander(f"{icon} **{level}** - {action_item[:50]}...", expanded=True):
+                st.write(f"**Action:** {action_item}")
+                st.write(f"**Context:** {context}")
+                if deadline:
+                    st.caption(f"Deadline: {deadline}")
     
     # Full report JSON
     with st.expander("View Raw Report JSON"):

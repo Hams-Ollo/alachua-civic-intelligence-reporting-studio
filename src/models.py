@@ -86,7 +86,7 @@ class StructuredGeminiModel[T]:
 def get_gemini_pro() -> GeminiModel:
     """Returns Gemini 2.5 Pro configured for complex reasoning."""
     return GeminiModel(
-        model_name="gemini-2.5-pro-preview-06-05",
+        model_name="gemini-2.5-pro",
         temperature=0.2,
         max_output_tokens=8192
     )
@@ -95,7 +95,7 @@ def get_gemini_pro() -> GeminiModel:
 def get_gemini_flash() -> GeminiModel:
     """Returns Gemini 2.5 Flash configured for speed/extraction."""
     return GeminiModel(
-        model_name="gemini-2.5-flash-preview-05-20",
+        model_name="gemini-2.5-flash",
         temperature=0.1,
         max_output_tokens=8192
     )
