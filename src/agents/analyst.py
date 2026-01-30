@@ -6,8 +6,6 @@ from src.schemas import ScoutReport
 from src.models import get_gemini_pro
 from src.tools import deep_research
 from src.prompts import get_alachua_context
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
 
 
 class AnalystAgent(BaseAgent):
@@ -15,6 +13,7 @@ class AnalystAgent(BaseAgent):
     Layer 2 Analyst agent for deep research and pattern analysis.
     
     Uses domain context from prompt_library for enhanced analysis.
+    Uses native google.genai SDK to avoid PyTorch/transformers dependencies.
     """
     
     def __init__(self, name: str):
@@ -23,31 +22,12 @@ class AnalystAgent(BaseAgent):
         self.structured_llm = self.llm.with_structured_output(ScoutReport)
         self.context = get_alachua_context()
 
-    def _execute(self, input_data: Dict[str, Any]) -> ScoutReport:
-        """
-        1. Formulate search queries based on topic.
-        2. Execute Deep Research (Tavily).
-        3. Synthesize findings with domain context into a Report.
-        """
-        topic = input_data.get("topic")
-        if not topic:
-            raise ValueError("AnalystAgent requires a 'topic'")
+    def _build_prompt(self, agent_id: str, date: str, topic: str, 
+                      research_context: str, keywords: str, entities: str) -> str:
+        """Build the analysis prompt with domain context."""
+        return f"""You are an **Impact Assessment Analyst** for the Alachua Civic Intelligence System.
 
-        self.logger.info("Starting deep research", topic=topic)
-        
-        # 1. Deep Research with domain-aware query
-        search_query = f"Current news and development updates regarding {topic} Alachua County Florida"
-        research_context = deep_research.invoke(search_query)
-        
-        self.logger.info("Research complete", context_length=len(research_context))
-        
-        # 2. Synthesis with domain context
-        current_date = datetime.now().date().isoformat()
-        
-        prompt = ChatPromptTemplate.from_template(
-            """You are an **Impact Assessment Analyst** for the Alachua Civic Intelligence System.
-
-{domain_context}
+{self.context.get_prompt_context()}
 
 ---
 ## CURRENT TASK
@@ -84,19 +64,39 @@ Analyze the research findings and generate a comprehensive Intelligence Report:
 
 Synthesize patterns across sources. Flag any contradictions or gaps in information.
 """
+
+    def _execute(self, input_data: Dict[str, Any]) -> ScoutReport:
+        """
+        1. Formulate search queries based on topic.
+        2. Execute Deep Research (Tavily).
+        3. Synthesize findings with domain context into a Report.
+        """
+        topic = input_data.get("topic")
+        if not topic:
+            raise ValueError("AnalystAgent requires a 'topic'")
+
+        self.logger.info("Starting deep research", topic=topic)
+        
+        # 1. Deep Research with domain-aware query
+        search_query = f"Current news and development updates regarding {topic} Alachua County Florida"
+        research_context = deep_research.invoke(search_query)
+        
+        self.logger.info("Research complete", context_length=len(research_context))
+        
+        # 2. Synthesis with domain context
+        current_date = datetime.now().date().isoformat()
+        
+        prompt = self._build_prompt(
+            agent_id=self.name,
+            date=current_date,
+            topic=topic,
+            research_context=research_context[:60000],
+            keywords=self.context.get_keywords_string(),
+            entities=self.context.get_entities_string()
         )
         
-        chain = prompt | self.structured_llm
-        
-        result = chain.invoke({
-            "domain_context": self.context.get_prompt_context(),
-            "agent_id": self.name,
-            "date": current_date,
-            "topic": topic,
-            "research_context": research_context[:60000],  # Leave room for context
-            "keywords": self.context.get_keywords_string(),
-            "entities": self.context.get_entities_string(),
-        })
+        # 3. Execute with structured output
+        result: ScoutReport = self.structured_llm.invoke(prompt)
         
         self.logger.info(
             "Analysis complete",

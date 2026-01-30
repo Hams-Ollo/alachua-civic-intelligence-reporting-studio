@@ -130,6 +130,8 @@ def render_analyst_inputs():
 
 def run_scout_agent(url: str, save_to_db: bool, show_prompt: bool):
     """Execute a Scout agent and display results."""
+    error_info = None
+    
     with st.status("Running Scout Agent...", expanded=True) as status:
         try:
             st.write("🔍 Fetching content from URL...")
@@ -149,7 +151,6 @@ def run_scout_agent(url: str, save_to_db: bool, show_prompt: bool):
             # Show the prompt if requested
             if show_prompt:
                 st.write("📝 Generated prompt:")
-                # We'll capture the prompt in the agent execution
             
             result = agent.run({"url": url})
             
@@ -158,14 +159,23 @@ def run_scout_agent(url: str, save_to_db: bool, show_prompt: bool):
             
             # Store result in session state
             st.session_state["last_scout_result"] = result
+            st.session_state["scout_error"] = None
             
         except Exception as e:
-            status.update(label="Scout Agent Failed", state="error")
-            st.error(f"Error: {str(e)}")
             import traceback
-            with st.expander("Full traceback"):
-                st.code(traceback.format_exc())
-            return
+            error_info = {
+                "message": str(e),
+                "traceback": traceback.format_exc()
+            }
+            status.update(label="Scout Agent Failed", state="error")
+            st.session_state["scout_error"] = error_info
+    
+    # Display error outside of status block to avoid nested expander issue
+    if error_info:
+        st.error(f"Error: {error_info['message']}")
+        with st.expander("Full traceback"):
+            st.code(error_info['traceback'])
+        return
     
     # Display results
     display_scout_result(st.session_state.get("last_scout_result"))
@@ -173,6 +183,8 @@ def run_scout_agent(url: str, save_to_db: bool, show_prompt: bool):
 
 def run_analyst_agent(topic: str, save_to_db: bool, show_prompt: bool):
     """Execute an Analyst agent and display results."""
+    error_info = None
+    
     with st.status("Running Analyst Agent...", expanded=True) as status:
         try:
             st.write("🔬 Conducting deep research...")
@@ -194,14 +206,23 @@ def run_analyst_agent(topic: str, save_to_db: bool, show_prompt: bool):
             
             # Store result in session state
             st.session_state["last_analyst_result"] = result
+            st.session_state["analyst_error"] = None
             
         except Exception as e:
-            status.update(label="Analyst Agent Failed", state="error")
-            st.error(f"Error: {str(e)}")
             import traceback
-            with st.expander("Full traceback"):
-                st.code(traceback.format_exc())
-            return
+            error_info = {
+                "message": str(e),
+                "traceback": traceback.format_exc()
+            }
+            status.update(label="Analyst Agent Failed", state="error")
+            st.session_state["analyst_error"] = error_info
+    
+    # Display error outside of status block to avoid nested expander issue
+    if error_info:
+        st.error(f"Error: {error_info['message']}")
+        with st.expander("Full traceback"):
+            st.code(error_info['traceback'])
+        return
     
     # Display results
     display_analyst_result(st.session_state.get("last_analyst_result"))
