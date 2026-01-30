@@ -199,6 +199,14 @@ open-sousveillance-studio/
 │   │   ├── checkpointer.py     # State persistence
 │   │   └── nodes.py            # Reusable nodes
 │   │
+│   ├── ui/                     # Streamlit Dev Console
+│   │   ├── app.py              # Main Streamlit app
+│   │   └── pages/              # Tab pages
+│   │       ├── agent_runner.py # Test agents
+│   │       ├── prompt_inspector.py
+│   │       ├── source_tester.py
+│   │       └── config_viewer.py
+│   │
 │   ├── app.py                  # FastAPI application
 │   ├── main.py                 # CLI entry point
 │   ├── config.py               # Configuration loader
@@ -280,6 +288,36 @@ For quick testing without background tasks:
 ```bash
 uvicorn src.app:app --reload --port 8000
 ```
+
+### Streamlit Dev Console (Recommended for Testing)
+
+The easiest way to test agents interactively:
+
+```bash
+streamlit run src/ui/app.py
+# Opens at http://localhost:8501
+```
+
+```mermaid
+flowchart LR
+    subgraph DevConsole["🔬 Dev Console Tabs"]
+        AR[Agent Runner]
+        PI[Prompt Inspector]
+        ST[Source Tester]
+        CV[Config Viewer]
+    end
+    
+    AR --> |Test| Agents
+    PI --> |View| Prompts
+    ST --> |Scrape| Sources
+    CV --> |Inspect| Config
+```
+
+**Features:**
+- **Agent Runner** - Execute Scout/Analyst agents with custom URLs
+- **Prompt Inspector** - Browse prompt library and view injected context
+- **Source Tester** - Test web scraping on configured sources
+- **Config Viewer** - Inspect YAML configs and environment variables
 
 ### CLI Mode
 

@@ -383,27 +383,70 @@ def get_db():
 - Updated `ScoutAgent` and `AnalystAgent` to use domain context
 - Updated `prompt_library/README.md` with integration documentation
 
+### [x] Security Scan and Vulnerability Fixes
+**Completed:** 2026-01-30
+- Ran pip-audit, bandit, and safety scans
+- Fixed hardcoded host binding (0.0.0.0 → env var)
+- Pinned all dependencies to specific versions
+- Added HOST, PORT, RELOAD env vars to `.env.example`
+
+### [x] Streamlit Dev Console
+**Completed:** 2026-01-30
+- `src/ui/app.py` - Main Streamlit application
+- `src/ui/pages/agent_runner.py` - Test Scout/Analyst agents
+- `src/ui/pages/prompt_inspector.py` - View prompt library
+- `src/ui/pages/source_tester.py` - Test web scraping
+- `src/ui/pages/config_viewer.py` - View YAML configs and env vars
+- Added `streamlit==1.45.0` to requirements.txt
+
+### [x] Native Google GenAI SDK Migration
+**Completed:** 2026-01-30
+- Replaced `langchain_google_genai` with native `google.genai` SDK
+- Fixed PyTorch DLL loading issues on Windows
+- Updated `src/models.py` with `GeminiModel` and `StructuredGeminiModel` classes
+- Updated `src/agents/scout.py` and `src/agents/analyst.py` to use native SDK
+- Fixed model names to `gemini-2.5-pro` and `gemini-2.5-flash`
+
+---
+
+## 🔜 Next Priority Items
+
+### [ ] Supabase Integration Testing
+- Test database writes with real Supabase instance
+- Implement document storage for PDFs
+- Test vector embeddings with pgvector
+
+### [ ] Human-in-the-Loop Approval Flow
+- Implement LangGraph interrupt/resume
+- Build approval UI in Streamlit
+- Email notifications for pending approvals
+
+### [ ] Florida Public Notices Scraper
+- Implement scraper for statewide public notices
+- Filter by Alachua County
+- Parse legal notice formats
+
 ---
 
 ## Notes
 
-- **Current State:** The codebase has excellent documentation (README, YAML configs, prompt library) but implementation lags behind
-- **Recommended Approach:** Fix P0 issues first to get a runnable baseline, then build out P1 features incrementally
-- **Testing Strategy:** Add tests as features are implemented, not retroactively
+- **Current State:** Core agents (Scout + Analyst) are working and tested via Streamlit Dev Console
+- **LLM:** Using native `google.genai` SDK (not LangChain) to avoid PyTorch dependency issues
+- **Testing:** 37 tests passing, 7 skipped (docling/NumPy compatibility)
+- **Next Focus:** Supabase integration, human-in-the-loop approval flow
 
 ---
 
 ## Quick Reference: File Status
 
-| File | Status | Priority |
-|:-----|:-------|:---------|
-| `src/tools.py` | 🔴 Broken | P0 |
-| `src/models.py` | 🔴 Broken | P0 |
-| `src/config.py` | 🟡 Fragile | P0/P2 |
-| `src/registry.py` | 🟠 Redundant | P1 |
-| `src/main.py` | 🟠 Incomplete | P1 |
-| `src/database.py` | 🟡 Fragile | P2 |
-| `src/schemas.py` | 🟢 Good | P2 |
-| `src/agents/base.py` | 🟡 Needs refactor | P2 |
-| `src/agents/scout.py` | 🟢 Good | - |
-| `src/agents/analyst.py` | 🟢 Good | - |
+| File | Status | Notes |
+|:-----|:-------|:------|
+| `src/tools.py` | ✅ Working | Firecrawl + Tavily tools |
+| `src/models.py` | ✅ Working | Native google.genai SDK |
+| `src/config.py` | ✅ Working | YAML config loader |
+| `src/database.py` | ✅ Working | Lazy initialization |
+| `src/schemas.py` | ✅ Working | All report types |
+| `src/agents/base.py` | ✅ Working | BaseReport return type |
+| `src/agents/scout.py` | ✅ Working | Tested via Streamlit |
+| `src/agents/analyst.py` | ✅ Working | Tested via Streamlit |
+| `src/ui/app.py` | ✅ Working | Streamlit Dev Console |

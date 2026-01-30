@@ -270,3 +270,110 @@ Azure DevOps-style project tracking including:
 1. Begin CivicClerk scraper implementation (T2.2.1-T2.2.6)
 2. Implement change detection (T2.6.1-T2.6.4)
 3. Write integration tests for Scout layer
+
+---
+
+## Session 3: Testing, Security & Dev Console (2026-01-30)
+
+### Session Focus
+- Codebase review and testing
+- Security vulnerability scanning
+- Streamlit Dev Console implementation
+- Native Google GenAI SDK migration
+
+### Major Accomplishments
+
+#### 1. Security Scan & Fixes
+- Ran `pip-audit`, `bandit`, and `safety` scans
+- Fixed hardcoded `0.0.0.0` host binding → environment variable
+- Pinned all dependencies to specific versions in `requirements.txt`
+- Added `HOST`, `PORT`, `RELOAD` env vars
+
+#### 2. Streamlit Dev Console
+Created browser-based testing interface at `src/ui/`:
+
+```
+src/ui/
+├── __init__.py
+├── app.py                    # Main Streamlit app
+└── pages/
+    ├── __init__.py
+    ├── agent_runner.py       # Test Scout/Analyst agents
+    ├── prompt_inspector.py   # View prompt library
+    ├── source_tester.py      # Test web scraping
+    └── config_viewer.py      # View YAML configs
+```
+
+**Run with:** `streamlit run src/ui/app.py`
+
+#### 3. Native Google GenAI SDK Migration
+Replaced `langchain_google_genai` with native `google.genai` SDK to fix PyTorch DLL loading issues on Windows:
+
+- `src/models.py` - New `GeminiModel` and `StructuredGeminiModel` classes
+- `src/agents/scout.py` - Updated to use native SDK
+- `src/agents/analyst.py` - Updated to use native SDK
+- Fixed model names: `gemini-2.5-pro`, `gemini-2.5-flash`
+
+#### 4. Test Suite Fixes
+- Fixed NumPy version conflict (`numpy<2` for docling)
+- Fixed test mocks to match actual implementations
+- Cleaned Celery beat schedule (removed non-existent tasks)
+- **Result:** 37 tests passing, 7 skipped
+
+### Files Created
+- `src/ui/__init__.py`
+- `src/ui/app.py`
+- `src/ui/pages/__init__.py`
+- `src/ui/pages/agent_runner.py`
+- `src/ui/pages/prompt_inspector.py`
+- `src/ui/pages/source_tester.py`
+- `src/ui/pages/config_viewer.py`
+- `pytest.ini`
+
+### Files Modified
+- `requirements.txt` - Pinned versions, added streamlit
+- `src/models.py` - Native google.genai SDK
+- `src/agents/scout.py` - Removed LangChain dependency
+- `src/agents/analyst.py` - Removed LangChain dependency
+- `src/tools/__init__.py` - Export tools, catch OSError
+- `src/app.py` - Environment variable for host binding
+- `.env.example` - Added HOST, PORT, RELOAD vars
+
+### Current Architecture
+
+```mermaid
+flowchart TB
+    subgraph UI["🔬 Dev Console"]
+        ST[Streamlit<br/>localhost:8501]
+    end
+    
+    subgraph Agents["🤖 Agents"]
+        SA[ScoutAgent]
+        AA[AnalystAgent]
+    end
+    
+    subgraph LLM["🧠 LLM"]
+        GEM[google.genai<br/>Gemini 2.5 Pro]
+    end
+    
+    subgraph Tools["🔧 Tools"]
+        FC[Firecrawl]
+        TAV[Tavily]
+    end
+    
+    ST --> SA & AA
+    SA --> GEM
+    SA --> FC
+    AA --> GEM
+    AA --> TAV
+```
+
+### Test Results
+```
+37 passed, 7 skipped in 11.43s
+```
+
+### Next Session Priorities
+1. Supabase integration testing
+2. Human-in-the-loop approval flow
+3. Florida Public Notices scraper

@@ -8,8 +8,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Firecrawl](https://img.shields.io/badge/scraping-Firecrawl-red.svg)](https://firecrawl.dev/)
 
-**Version:** 2.0  
-**Status:** 🚧 Active Development  
+**Version:** 0.1.0-dev  
+**Status:** ✅ Core Agents Working (Scout + Analyst tested)  
 **Origin:** 📍 Alachua County, Florida — Built to protect the Floridan Aquifer
 
 > *"Sousveillance"* (French: sous "from below" + veillance "watching") — the recording of an activity by a participant, in contrast to surveillance, which is done by an authority. **They watched us. Now we watch back.**
@@ -630,25 +630,72 @@ curl -X POST "http://localhost:8000/approvals/{thread_id}/decide" \
 
 ---
 
-## 📅 Roadmap
+## � Streamlit Dev Console
+
+A browser-based testing interface for debugging agents and inspecting prompts.
+
+```bash
+# Start the dev console
+streamlit run src/ui/app.py
+# Opens at http://localhost:8501
+```
+
+```mermaid
+flowchart LR
+    subgraph DevConsole["🔬 Dev Console (Streamlit)"]
+        AR[Agent Runner<br/>Test Scout/Analyst]
+        PI[Prompt Inspector<br/>View Prompts]
+        ST[Source Tester<br/>Test Scraping]
+        CV[Config Viewer<br/>YAML + Env Vars]
+    end
+    
+    subgraph Backend["Backend Services"]
+        GEM[Gemini 2.5 Pro]
+        FC[Firecrawl API]
+        TAV[Tavily Search]
+    end
+    
+    AR --> GEM
+    AR --> FC
+    ST --> FC
+    AR --> TAV
+```
+
+### Dev Console Features
+
+| Tab | Purpose |
+|:----|:--------|
+| **🤖 Agent Runner** | Execute Scout/Analyst agents with custom URLs, view structured reports |
+| **📝 Prompt Inspector** | Browse prompt library, view injected domain context |
+| **🌐 Source Tester** | Test web scraping on sources from `config/sources.yaml` |
+| **⚙️ Config Viewer** | Inspect YAML configs and environment variable status |
+
+---
+
+## �📅 Roadmap
 
 ### Phase 1: Foundation ✅
 - [x] Project structure and configuration
 - [x] Pydantic schemas for all data models
 - [x] Supabase database connection
 - [x] Source registry documentation
+- [x] Structured logging with structlog
+- [x] Unit test suite (pytest)
+- [x] Docker Compose configuration
 
-### Phase 2: Scout Layer (Current) 🚧
-- [ ] Firecrawl client wrapper with retry logic
-- [ ] CivicClerk scraper (Firecrawl + actions)
+### Phase 2: Scout Layer ✅
+- [x] Firecrawl client wrapper with retry logic
+- [x] CivicClerk scraper (Firecrawl + actions)
+- [x] PDF processing pipeline (Firecrawl + Gemini)
+- [x] Native Google GenAI SDK integration
+- [x] Streamlit Dev Console for testing
 - [ ] Florida Public Notices scraper
-- [ ] PDF processing pipeline (Firecrawl + Gemini)
 - [ ] Document storage with Supabase
 - [ ] Change detection and deduplication
 
-### Phase 3: Analyst Layer
-- [ ] LangGraph workflow implementation
-- [ ] Tavily integration for deep research
+### Phase 3: Analyst Layer (Current) 🚧
+- [x] LangGraph workflow implementation
+- [x] Tavily integration for deep research
 - [ ] Human approval checkpoint (interrupt/resume)
 - [ ] FastAPI approval endpoints
 
@@ -659,10 +706,10 @@ curl -X POST "http://localhost:8000/approvals/{thread_id}/decide" \
 - [ ] Quarterly health scorecard
 
 ### Phase 5: Production Hardening
-- [ ] APScheduler cron integration
+- [x] Celery + Beat scheduling
 - [ ] Error handling and retry logic
 - [ ] Monitoring and alerting
-- [ ] Docker deployment
+- [x] Docker deployment
 
 ---
 
