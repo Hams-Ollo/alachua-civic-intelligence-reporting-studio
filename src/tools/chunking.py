@@ -1,5 +1,5 @@
 """
-Document chunking pipeline for Alachua Civic Intelligence System.
+Document chunking pipeline for Open Sousveillance Studio System.
 
 Splits documents into embeddable chunks using LangChain's
 RecursiveCharacterTextSplitter with settings optimized for
@@ -24,7 +24,7 @@ class DocumentChunk:
     chunk_index: int
     document_id: str
     metadata: dict
-    
+
     def to_dict(self) -> dict:
         """Convert to dictionary for storage."""
         return {
@@ -38,12 +38,12 @@ class DocumentChunk:
 class ChunkingPipeline:
     """
     Split documents into chunks suitable for embedding.
-    
+
     Uses RecursiveCharacterTextSplitter which tries to split
     on natural boundaries (paragraphs, sentences) before
     falling back to character-level splits.
     """
-    
+
     def __init__(
         self,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
@@ -51,14 +51,14 @@ class ChunkingPipeline:
     ):
         """
         Initialize the chunking pipeline.
-        
+
         Args:
             chunk_size: Target size for each chunk in characters.
             chunk_overlap: Number of characters to overlap between chunks.
         """
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
-        
+
         self.splitter = RecursiveCharacterTextSplitter(
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
@@ -75,7 +75,7 @@ class ChunkingPipeline:
                 ""           # Characters (last resort)
             ]
         )
-    
+
     def chunk_text(
         self,
         text: str,
@@ -84,21 +84,21 @@ class ChunkingPipeline:
     ) -> list[DocumentChunk]:
         """
         Split text into chunks with metadata.
-        
+
         Args:
             text: The document text to chunk.
             document_id: Unique identifier for the source document.
             metadata: Optional metadata to attach to each chunk.
-        
+
         Returns:
             List of DocumentChunk objects.
         """
         if metadata is None:
             metadata = {}
-        
+
         # Split the text
         chunks = self.splitter.split_text(text)
-        
+
         # Create DocumentChunk objects
         return [
             DocumentChunk(
@@ -113,17 +113,17 @@ class ChunkingPipeline:
             )
             for i, chunk in enumerate(chunks)
         ]
-    
+
     def chunk_documents(
         self,
         documents: list[dict]
     ) -> list[DocumentChunk]:
         """
         Chunk multiple documents.
-        
+
         Args:
             documents: List of dicts with 'text', 'document_id', and optional 'metadata'.
-        
+
         Returns:
             List of all DocumentChunk objects from all documents.
         """
@@ -148,11 +148,11 @@ def get_chunking_pipeline(
 ) -> ChunkingPipeline:
     """
     Get or create the chunking pipeline singleton.
-    
+
     Args:
         chunk_size: Target chunk size in characters.
         chunk_overlap: Overlap between chunks.
-    
+
     Returns:
         ChunkingPipeline instance.
     """

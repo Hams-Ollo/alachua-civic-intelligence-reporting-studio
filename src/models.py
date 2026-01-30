@@ -1,5 +1,5 @@
 """
-LLM model configuration for Alachua Civic Intelligence System.
+LLM model configuration for Open Sousveillance Studio System.
 
 Provides configured Gemini models for different use cases:
 - Pro: Complex reasoning, analysis, synthesis
@@ -27,19 +27,19 @@ def _get_client() -> genai.Client:
 
 class GeminiModel:
     """Wrapper for Gemini models with structured output support."""
-    
+
     def __init__(self, model_name: str, temperature: float = 0.2, max_output_tokens: int = 8192):
         self.model_name = model_name
         self.temperature = temperature
         self.max_output_tokens = max_output_tokens
         self._client = None
-    
+
     @property
     def client(self) -> genai.Client:
         if self._client is None:
             self._client = _get_client()
         return self._client
-    
+
     def invoke(self, prompt: str) -> str:
         """Send a prompt and get a text response."""
         response = self.client.models.generate_content(
@@ -51,7 +51,7 @@ class GeminiModel:
             )
         )
         return response.text
-    
+
     def with_structured_output(self, schema: Type[T]) -> "StructuredGeminiModel[T]":
         """Return a model that outputs structured data matching the schema."""
         return StructuredGeminiModel(self, schema)
@@ -59,11 +59,11 @@ class GeminiModel:
 
 class StructuredGeminiModel[T]:
     """Gemini model that returns structured Pydantic output."""
-    
+
     def __init__(self, base_model: GeminiModel, schema: Type[T]):
         self.base_model = base_model
         self.schema = schema
-    
+
     def invoke(self, prompt: str) -> T:
         """Send a prompt and get a structured response."""
         response = self.base_model.client.models.generate_content(
@@ -76,7 +76,7 @@ class StructuredGeminiModel[T]:
                 response_schema=self.schema
             )
         )
-        
+
         # Parse JSON response into Pydantic model
         import json
         data = json.loads(response.text)

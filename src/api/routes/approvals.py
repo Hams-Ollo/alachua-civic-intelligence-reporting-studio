@@ -1,5 +1,5 @@
 """
-Approval API routes for Alachua Civic Intelligence System.
+Approval API routes for Open Sousveillance Studio System.
 
 Provides human-in-the-loop endpoints for:
 - GET /approvals/pending - List pending approvals
@@ -108,18 +108,18 @@ async def get_approval(approval_id: str):
 async def decide_approval(approval_id: str, request: ApprovalRequest):
     """
     Approve or reject a pending item.
-    
+
     - **decision**: "approved" or "rejected"
     - **comments**: Optional reviewer comments
     """
     if approval_id not in pending_approvals:
         raise HTTPException(status_code=404, detail="Approval not found or already decided")
-    
+
     if request.decision not in ["approved", "rejected"]:
         raise HTTPException(status_code=400, detail="Decision must be 'approved' or 'rejected'")
-    
+
     item = pending_approvals.pop(approval_id)
-    
+
     decision = ApprovalDecision(
         approval_id=approval_id,
         decision=request.decision,
@@ -127,14 +127,14 @@ async def decide_approval(approval_id: str, request: ApprovalRequest):
         item_summary=item.summary,
         decided_at=datetime.now()
     )
-    
+
     decided_approvals[approval_id] = decision
-    
+
     # If approved, trigger downstream actions (e.g., publish, notify)
     if request.decision == "approved":
         # TODO: Trigger synthesizer or notification
         pass
-    
+
     return decision
 
 

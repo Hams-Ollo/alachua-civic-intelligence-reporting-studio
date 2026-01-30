@@ -1,5 +1,5 @@
 """
-Alachua Civic Intelligence - Developer Console
+Open Sousveillance Studio - Developer Console
 
 A Streamlit-based testing and debugging interface for the civic intelligence system.
 
@@ -47,29 +47,29 @@ def render_sidebar():
     """Render the sidebar with environment status and settings."""
     with st.sidebar:
         st.title("🔬 Dev Console")
-        st.caption("Alachua Civic Intelligence System")
-        
+        st.caption("Open Sousveillance Studio System")
+
         st.divider()
-        
+
         # Environment Status
         st.subheader("Environment Status")
         api_keys = check_api_keys()
-        
+
         for key, configured in api_keys.items():
             if configured:
                 st.success(f"✓ {key}", icon="✅")
             else:
                 st.warning(f"✗ {key}", icon="⚠️")
-        
+
         st.divider()
-        
+
         # Quick Links
         st.subheader("Quick Links")
         st.page_link("https://alachua.legistar.com/Calendar.aspx", label="Legistar Calendar", icon="📅")
         st.page_link("https://alachuacounty.us/", label="Alachua County", icon="🏛️")
-        
+
         st.divider()
-        
+
         # Version info
         st.caption("Version: 0.1.0-dev")
         st.caption(f"Project: {PROJECT_ROOT.name}")
@@ -78,26 +78,26 @@ def render_sidebar():
 def main():
     """Main application entry point."""
     render_sidebar()
-    
+
     # Main content area with tabs
-    st.title("🔬 Alachua Civic Intelligence - Developer Console")
-    
+    st.title("🔬 Open Sousveillance Studio - Developer Console")
+
     tab1, tab2, tab3, tab4 = st.tabs([
         "🤖 Agent Runner",
-        "📝 Prompt Inspector", 
+        "📝 Prompt Inspector",
         "🌐 Source Tester",
         "⚙️ Config Viewer"
     ])
-    
+
     with tab1:
         agent_runner.render()
-    
+
     with tab2:
         prompt_inspector.render()
-    
+
     with tab3:
         source_tester.render()
-    
+
     with tab4:
         config_viewer.render()
 

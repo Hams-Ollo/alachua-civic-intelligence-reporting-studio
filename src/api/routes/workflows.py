@@ -1,5 +1,5 @@
 """
-Workflow API routes for Alachua Civic Intelligence System.
+Workflow API routes for Open Sousveillance Studio System.
 
 Provides endpoints for:
 - POST /run - Start an agent run
@@ -63,45 +63,45 @@ def run_agent_task(run_id: str, agent: str, url: Optional[str], topic: Optional[
     """Background task to run an agent."""
     runs[run_id].status = "running"
     runs[run_id].started_at = datetime.now()
-    
+
     try:
         if agent.startswith("A"):
             from src.agents.scout import ScoutAgent
             agent_instance = ScoutAgent(name=agent, prompt_template="Standard Scout Prompt")
-            
+
             if not url:
                 raise ValueError("URL required for Scout agents")
-            
+
             report = agent_instance.run({"url": url})
-            
+
             runs[run_id].result = {
                 "report_id": report.report_id,
                 "summary": report.executive_summary,
                 "alerts_count": len(report.alerts)
             }
-            
+
         elif agent.startswith("B"):
             from src.agents.analyst import AnalystAgent
             agent_instance = AnalystAgent(name=agent)
-            
+
             topic = topic or "Tara Forest Development"
             report = agent_instance.run({"topic": topic})
-            
+
             runs[run_id].result = {
                 "report_id": report.report_id,
                 "summary": report.executive_summary
             }
-        
+
         runs[run_id].status = "completed"
         runs[run_id].completed_at = datetime.now()
-        
+
         if save:
             try:
                 from src.database import get_db
                 get_db().save_report(report)
             except Exception as e:
                 print(f"Warning: Failed to save report: {e}")
-        
+
     except Exception as e:
         runs[run_id].status = "failed"
         runs[run_id].error = str(e)
@@ -116,20 +116,20 @@ def run_agent_task(run_id: str, agent: str, url: Optional[str], topic: Optional[
 async def run_agent(request: RunRequest, background_tasks: BackgroundTasks):
     """
     Start an agent run.
-    
+
     - **agent**: Agent ID (A1, A2 for scouts; B1 for analyst)
     - **url**: Target URL (required for scouts)
     - **topic**: Research topic (optional for analysts)
     - **save**: Whether to save results to database
     """
     run_id = str(uuid4())
-    
+
     runs[run_id] = RunStatus(
         run_id=run_id,
         agent=request.agent,
         status="pending"
     )
-    
+
     background_tasks.add_task(
         run_agent_task,
         run_id,
@@ -138,7 +138,7 @@ async def run_agent(request: RunRequest, background_tasks: BackgroundTasks):
         request.topic,
         request.save
     )
-    
+
     return RunResponse(
         run_id=run_id,
         agent=request.agent,

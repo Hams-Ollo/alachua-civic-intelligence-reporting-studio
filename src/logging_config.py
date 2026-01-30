@@ -1,5 +1,5 @@
 """
-Structured logging configuration for Alachua Civic Intelligence System.
+Structured logging configuration for Open Sousveillance Studio System.
 
 Uses structlog for structured JSON logging in production and
 colored console output in development.
@@ -45,7 +45,7 @@ def add_app_context(
 def configure_logging() -> None:
     """
     Configure structlog for the application.
-    
+
     Call this once at application startup (e.g., in main.py or app.py).
     """
     # Shared processors for both dev and prod
@@ -57,14 +57,14 @@ def configure_logging() -> None:
         structlog.processors.StackInfoRenderer(),
         structlog.processors.UnicodeDecoder(),
     ]
-    
+
     if LOG_FORMAT == "json":
         # Production: JSON output
         processors = shared_processors + [
             structlog.processors.format_exc_info,
             structlog.processors.JSONRenderer(),
         ]
-        
+
         # Configure structlog
         structlog.configure(
             processors=processors,
@@ -78,7 +78,7 @@ def configure_logging() -> None:
         processors = shared_processors + [
             structlog.dev.ConsoleRenderer(colors=True),
         ]
-        
+
         # Configure structlog
         structlog.configure(
             processors=processors,
@@ -87,7 +87,7 @@ def configure_logging() -> None:
             logger_factory=structlog.PrintLoggerFactory(),
             cache_logger_on_first_use=True,
         )
-    
+
     # Also configure standard library logging to use structlog
     # This captures logs from third-party libraries (uvicorn, celery, etc.)
     logging.basicConfig(
@@ -100,14 +100,14 @@ def configure_logging() -> None:
 def get_logger(name: str | None = None, **initial_context: Any) -> structlog.BoundLogger:
     """
     Get a configured logger instance.
-    
+
     Args:
         name: Logger name (e.g., "agents.scout", "tools.firecrawl")
         **initial_context: Key-value pairs to bind to all log entries
-    
+
     Returns:
         A bound structlog logger.
-    
+
     Example:
         logger = get_logger("agents.scout", agent_id="A1")
         logger.info("Starting scout run", source_id="alachua-city")
@@ -121,12 +121,12 @@ def get_logger(name: str | None = None, **initial_context: Any) -> structlog.Bou
 def bind_context(**context: Any) -> None:
     """
     Bind context variables that will be included in all subsequent logs.
-    
+
     Useful for request-scoped context like request_id.
-    
+
     Args:
         **context: Key-value pairs to bind
-    
+
     Example:
         bind_context(request_id="abc-123", user_id="user-456")
     """

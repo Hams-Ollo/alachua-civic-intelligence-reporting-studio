@@ -1,5 +1,5 @@
 """
-FastAPI application for Alachua Civic Intelligence System.
+FastAPI application for Open Sousveillance Studio System.
 
 Provides REST API endpoints for:
 - Running agents (POST /run)
@@ -90,7 +90,7 @@ logger = get_logger("api")
 async def lifespan(app: FastAPI):
     """Application lifespan handler."""
     # Startup
-    logger.info("Starting Alachua Civic Intelligence API")
+    logger.info("Starting Open Sousveillance Studio API")
     try:
         config = build_app_config()
         logger.info(
@@ -101,9 +101,9 @@ async def lifespan(app: FastAPI):
         )
     except Exception as e:
         logger.warning("Config warning", error=str(e))
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down")
 
@@ -113,7 +113,7 @@ async def lifespan(app: FastAPI):
 # =============================================================================
 
 app = FastAPI(
-    title="Alachua Civic Intelligence API",
+    title="Open Sousveillance Studio API",
     description="AI-powered civic monitoring for Alachua County, Florida",
     version="2.0.0",
     lifespan=lifespan
@@ -134,19 +134,19 @@ async def logging_middleware(request: Request, call_next):
     """Log all HTTP requests with timing and context."""
     request_id = str(uuid4())[:8]
     bind_context(request_id=request_id)
-    
+
     start_time = time.time()
-    
+
     logger.info(
         "Request started",
         method=request.method,
         path=request.url.path,
     )
-    
+
     try:
         response = await call_next(request)
         duration_ms = (time.time() - start_time) * 1000
-        
+
         logger.info(
             "Request completed",
             method=request.method,
@@ -154,7 +154,7 @@ async def logging_middleware(request: Request, call_next):
             status_code=response.status_code,
             duration_ms=round(duration_ms, 2)
         )
-        
+
         return response
     except Exception as e:
         duration_ms = (time.time() - start_time) * 1000
@@ -179,7 +179,7 @@ async def root():
     """API root - health check."""
     return {
         "status": "healthy",
-        "service": "Alachua Civic Intelligence API",
+        "service": "Open Sousveillance Studio API",
         "version": "2.0.0"
     }
 
@@ -218,35 +218,35 @@ def run_agent_task(run_id: str, agent: str, url: Optional[str], topic: Optional[
     """Background task to run an agent."""
     runs[run_id].status = "running"
     runs[run_id].started_at = datetime.now()
-    
+
     try:
         if agent.startswith("A"):
             from src.agents.scout import ScoutAgent
             agent_instance = ScoutAgent(name=agent, prompt_template="Standard Scout Prompt")
-            
+
             if not url:
                 raise ValueError("URL required for Scout agents")
-            
+
             report = agent_instance.run({"url": url})
-            
+
             runs[run_id].result = {
                 "report_id": report.report_id,
                 "summary": report.executive_summary,
                 "alerts_count": len(report.alerts)
             }
-            
+
         elif agent.startswith("B"):
             from src.agents.analyst import AnalystAgent
             agent_instance = AnalystAgent(name=agent)
-            
+
             topic = topic or "Tara Forest Development"
             report = agent_instance.run({"topic": topic})
-            
+
             runs[run_id].result = {
                 "report_id": report.report_id,
                 "summary": report.executive_summary
             }
-            
+
             # Analysts require approval
             approval_id = str(uuid4())
             pending_approvals[approval_id] = ApprovalItem(
@@ -256,17 +256,17 @@ def run_agent_task(run_id: str, agent: str, url: Optional[str], topic: Optional[
                 summary=report.executive_summary,
                 data=report.model_dump()
             )
-        
+
         runs[run_id].status = "completed"
         runs[run_id].completed_at = datetime.now()
-        
+
         if save:
             try:
                 from src.database import get_db
                 get_db().save_report(report)
             except Exception as e:
                 print(f"Warning: Failed to save report: {e}")
-        
+
     except Exception as e:
         runs[run_id].status = "failed"
         runs[run_id].error = str(e)
@@ -277,21 +277,21 @@ def run_agent_task(run_id: str, agent: str, url: Optional[str], topic: Optional[
 async def run_agent(request: RunRequest, background_tasks: BackgroundTasks):
     """
     Start an agent run.
-    
+
     - **agent**: Agent ID (A1, A2 for scouts; B1 for analyst)
     - **url**: Target URL (required for scouts)
     - **topic**: Research topic (optional for analysts)
     - **save**: Whether to save results to database
     """
     run_id = str(uuid4())
-    
+
     # Initialize run status
     runs[run_id] = RunStatus(
         run_id=run_id,
         agent=request.agent,
         status="pending"
     )
-    
+
     # Start background task
     background_tasks.add_task(
         run_agent_task,
@@ -301,7 +301,7 @@ async def run_agent(request: RunRequest, background_tasks: BackgroundTasks):
         request.topic,
         request.save
     )
-    
+
     return RunResponse(
         run_id=run_id,
         agent=request.agent,
@@ -353,15 +353,15 @@ async def get_approval(approval_id: str):
 async def decide_approval(approval_id: str, request: ApprovalRequest):
     """
     Approve or reject a pending item.
-    
+
     - **decision**: "approved" or "rejected"
     - **comments**: Optional reviewer comments
     """
     if approval_id not in pending_approvals:
         raise HTTPException(status_code=404, detail="Approval not found")
-    
+
     item = pending_approvals.pop(approval_id)
-    
+
     return {
         "approval_id": approval_id,
         "decision": request.decision,
@@ -377,7 +377,7 @@ async def decide_approval(approval_id: str, request: ApprovalRequest):
 async def event_generator(run_id: str):
     """Generate SSE events for a run."""
     import asyncio
-    
+
     while True:
         if run_id in runs:
             status = runs[run_id]
@@ -385,10 +385,10 @@ async def event_generator(run_id: str):
                 "event": "status",
                 "data": status.model_dump_json()
             }
-            
+
             if status.status in ["completed", "failed"]:
                 break
-        
+
         await asyncio.sleep(1)
 
 
@@ -397,7 +397,7 @@ async def stream_run(run_id: str):
     """Stream real-time updates for an agent run via SSE."""
     if run_id not in runs:
         raise HTTPException(status_code=404, detail="Run not found")
-    
+
     return EventSourceResponse(event_generator(run_id))
 
 

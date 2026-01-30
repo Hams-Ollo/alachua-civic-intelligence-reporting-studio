@@ -1,10 +1,10 @@
 """
-Celery application configuration for Alachua Civic Intelligence System.
+Celery application configuration for Open Sousveillance Studio System.
 
 Usage:
     # Start worker
     celery -A src.tasks.celery_app worker --loglevel=info
-    
+
     # Start beat scheduler
     celery -A src.tasks.celery_app beat --loglevel=info
 """
@@ -35,14 +35,14 @@ celery_app.conf.update(
     result_serializer="json",
     timezone="America/New_York",
     enable_utc=True,
-    
+
     # Task execution settings
     task_acks_late=True,
     task_reject_on_worker_lost=True,
-    
+
     # Result settings
     result_expires=86400,  # 24 hours
-    
+
     # Worker settings
     worker_prefetch_multiplier=1,
     worker_concurrency=4,

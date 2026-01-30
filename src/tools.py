@@ -1,5 +1,5 @@
 """
-Tools module for Alachua Civic Intelligence System.
+Tools module for Open Sousveillance Studio System.
 
 Provides LangChain tools for:
 - Web scraping via Firecrawl
@@ -46,7 +46,7 @@ def deep_research(query: str, max_results: int = 5) -> str:
     client = get_tavily_client()
     if not client:
         return "Error: Tavily API Key not configured. Set TAVILY_API_KEY environment variable."
-    
+
     try:
         response = client.search(query, search_depth="advanced", max_results=max_results)
         results = []
@@ -63,7 +63,7 @@ def monitor_url(url: str, wait_time: int = 2000) -> str:
     Fetches the content of a URL using Firecrawl.
     Handles JavaScript-rendered pages (React SPAs like CivicClerk).
     Use this for "Scout" tasks to read specific agendas or pages.
-    
+
     Args:
         url: The URL to scrape
         wait_time: Milliseconds to wait for JS rendering (default 2000ms)
@@ -71,7 +71,7 @@ def monitor_url(url: str, wait_time: int = 2000) -> str:
     client = get_firecrawl_client()
     if not client:
         return "Error: Firecrawl API Key not configured. Set FIRECRAWL_API_KEY environment variable."
-    
+
     try:
         # Use Firecrawl with actions for JS-rendered content
         result = client.scrape(
@@ -82,7 +82,7 @@ def monitor_url(url: str, wait_time: int = 2000) -> str:
                 {"type": "scroll", "direction": "down"}
             ]
         )
-        
+
         # Extract markdown content
         if hasattr(result, 'markdown'):
             content = result.markdown
@@ -90,10 +90,10 @@ def monitor_url(url: str, wait_time: int = 2000) -> str:
             content = result.get('markdown', result.get('content', str(result)))
         else:
             content = str(result)
-        
+
         # Truncate if needed for LLM context
         return content[:50000] if content else "No content extracted."
-        
+
     except Exception as e:
         return f"Failed to fetch {url}: {e}"
 
@@ -103,28 +103,28 @@ def scrape_pdf(url: str) -> str:
     """
     Fetches and extracts text from a PDF URL using Firecrawl.
     Use this for agenda packets, staff reports, and other PDF documents.
-    
+
     Args:
         url: Direct URL to a PDF file
     """
     client = get_firecrawl_client()
     if not client:
         return "Error: Firecrawl API Key not configured. Set FIRECRAWL_API_KEY environment variable."
-    
+
     try:
         result = client.scrape(
             url,
             formats=["markdown"]
         )
-        
+
         if hasattr(result, 'markdown'):
             content = result.markdown
         elif isinstance(result, dict):
             content = result.get('markdown', result.get('content', str(result)))
         else:
             content = str(result)
-        
+
         return content[:50000] if content else "No content extracted from PDF."
-        
+
     except Exception as e:
         return f"Failed to extract PDF from {url}: {e}"
