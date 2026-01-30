@@ -60,17 +60,28 @@ cp .env.example .env
 # Edit .env with your API keys
 ```
 
-### Run the Dev Console
+### Quick Start (Windows)
 
-The easiest way to test the system:
+The easiest way to start everything:
 
+```powershell
+# Run the startup script (starts both services)
+.\start-all.ps1
+```
+
+This launches:
+- **Streamlit Dev Console** at `http://localhost:8501`
+- **FastAPI Backend** at `http://localhost:8000`
+
+### Manual Start
+
+**Dev Console only:**
 ```bash
 streamlit run src/ui/app.py
 # Opens at http://localhost:8501
 ```
 
-### Run the API Server
-
+**API Server only:**
 ```bash
 uvicorn src.app:app --reload --port 8000
 # API docs at http://localhost:8000/docs

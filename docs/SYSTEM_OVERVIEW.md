@@ -25,13 +25,13 @@ flowchart TB
         A3[A3: Legislative Monitor<br/>Code Changes]
         A4[A4: Public Notice Scout<br/>Legal Notices]
     end
-    
+
     subgraph Layer2["Layer 2: ANALYSTS (Weekly)"]
         direction LR
         B1[B1: Impact Analyst<br/>Environmental/Community]
         B2[B2: Procedural Analyst<br/>Process Violations]
     end
-    
+
     subgraph Layer3["Layer 3: SYNTHESIZERS (Monthly)"]
         direction LR
         C1[C1: Newsletter Generator]
@@ -39,7 +39,7 @@ flowchart TB
         C3[C3: Alert Broadcaster]
         C4[C4: Quarterly Scorecard]
     end
-    
+
     Layer1 -->|ScoutReports| DB[(Supabase)]
     DB -->|Query| Layer2
     Layer2 -->|AnalystReports| DB
@@ -80,7 +80,7 @@ class ScoutReport(BaseReport):
 
 ### Open Questions
 
-1. Should Scouts run on a fixed schedule (daily at 6 AM) or be triggered by change detection?
+1. Scouts run on a fixed daily schedule (4 AM), with support for manual triggering via API or Dev Console.
 2. Do you want Scouts to store the raw scraped content, or just the extracted report?
 3. Should each source have its own Scout instance, or one Scout handles multiple sources?
 
@@ -175,7 +175,7 @@ erDiagram
         jsonb report_data
         string content_hash
     }
-    
+
     ANALYST_REPORTS {
         uuid id PK
         string report_id
@@ -184,7 +184,7 @@ erDiagram
         jsonb report_data
         string[] scout_report_ids FK
     }
-    
+
     APPROVALS {
         uuid id PK
         string report_id FK
@@ -193,7 +193,7 @@ erDiagram
         timestamp decided_at
         text comments
     }
-    
+
     DOCUMENTS {
         uuid id PK
         string url
@@ -201,14 +201,14 @@ erDiagram
         bytea pdf_content
         text extracted_text
     }
-    
+
     EMBEDDINGS {
         uuid id PK
         uuid document_id FK
         vector embedding
         text chunk_text
     }
-    
+
     SCOUT_REPORTS ||--o{ ANALYST_REPORTS : "feeds"
     ANALYST_REPORTS ||--o| APPROVALS : "requires"
     DOCUMENTS ||--o{ EMBEDDINGS : "chunks"
@@ -322,26 +322,26 @@ sequenceDiagram
     Celery->>Scout: Run A1 for CivicClerk
     Scout->>FC: Scrape meeting list
     FC-->>Scout: Markdown + PDF links
-    
+
     Scout->>Gemini: Extract agenda items
     Note over Gemini: Matches "Mill Creek" keyword
     Gemini-->>Scout: ScoutReport with RED alert
-    
+
     Scout->>DB: Store report
-    
+
     alt RED Alert - Immediate Path
         Scout->>Citizen: SMS/Email: "Mill Creek on agenda!"
     end
-    
+
     Note over Celery: Weekly Monday 9 AM
     Celery->>Analyst: Run B1 analysis
     Analyst->>DB: Query RED/YELLOW reports
     Analyst->>Analyst: Tavily research on Mill Creek
     Analyst->>DB: Store AnalystReport
-    
+
     Analyst->>Human: Approval required
     Human-->>Analyst: Approved ✓
-    
+
     Analyst->>Synth: Generate newsletter
     Synth->>Citizen: Weekly digest email
 ```
@@ -354,7 +354,7 @@ sequenceDiagram
 
 | Aspect | Current | Your Vision? |
 |:-------|:--------|:-------------|
-| Scout frequency | Daily scheduled | ? |
+| Scout frequency | Daily scheduled | Daily at 4 AM + manual trigger |
 | Analyst trigger | Weekly scheduled | ? |
 | RED alert handling | Waits for Analyst | Immediate? |
 | Approval flow | Single reviewer | Committee? |

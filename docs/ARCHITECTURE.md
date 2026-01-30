@@ -43,12 +43,12 @@ flowchart TB
             A2[A2: Permit Scout]
             A3[A3: Legislative Monitor]
         end
-        
+
         subgraph L2["Layer 2: Analysts (Weekly)"]
             B1[B1: Impact Analyst]
             B2[B2: Procedural Analyst]
         end
-        
+
         subgraph L3["Layer 3: Synthesizers (Monthly)"]
             C1[C1: Newsletter Generator]
             C2[C2: Social Media Planner]
@@ -158,23 +158,24 @@ sequenceDiagram
     participant SYNTH as 📝 Synthesizer
     participant EMAIL as 📧 Newsletter
 
-    CRON->>SCOUT: Daily trigger (6 AM)
+    CRON->>SCOUT: Daily trigger (4 AM)
     SCOUT->>SRC: Fetch meeting list (Firecrawl)
     SRC-->>SCOUT: Markdown + PDF links
     SCOUT->>PDF: Download agenda packets
     PDF-->>SCOUT: Extracted text + tables
     SCOUT->>DB: Store ScoutReport + embeddings
-    
+
     Note over DB: Deduplicate via content hash
-    
+    Note over SCOUT: Scouts can also be manually triggered via API/CLI/Dev Console
+
     CRON->>ANALYST: Weekly trigger (Monday 9 AM)
     ANALYST->>DB: Query RED/YELLOW alerts
     ANALYST->>ANALYST: Tavily deep research
     ANALYST->>DB: Store AnalystReport
     ANALYST->>HUMAN: interrupt() - Approval required
-    
+
     HUMAN-->>ANALYST: Approved ✓
-    
+
     ANALYST->>SYNTH: Resume workflow
     SYNTH->>SYNTH: Generate newsletter content
     SYNTH->>EMAIL: Send via Resend API
@@ -321,7 +322,7 @@ jurisdiction:
 schedule:
   scouts:
     enabled: true
-    cron: "0 6 * * *"  # Daily at 6 AM
+    cron: "0 4 * * *"  # Daily at 4 AM
   analysts:
     enabled: true
     cron: "0 9 * * 1"  # Weekly on Monday
@@ -446,13 +447,13 @@ flowchart LR
         ST[Source Tester<br/>Test Scraping]
         CV[Config Viewer<br/>YAML + Env Vars]
     end
-    
+
     subgraph Backend["Backend Services"]
         GEM[Gemini 2.5 Pro]
         FC[Firecrawl API]
         TAV[Tavily Search]
     end
-    
+
     AR --> GEM
     AR --> FC
     ST --> FC

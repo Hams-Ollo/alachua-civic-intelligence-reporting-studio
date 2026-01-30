@@ -445,6 +445,14 @@ def get_db():
 - Created `.vscode/settings.json` - IDE workspace settings
 - Created `src/exceptions.py` - custom exception classes
 
+### [x] Startup Script Fix & Documentation
+
+**Completed:** 2026-01-30
+
+- Fixed `start-all.ps1` - `$projectRoot` variable now properly interpolated
+- Added startup script documentation to `README.md`
+- Added startup script documentation to `docs/DEVELOPER_GUIDE.md`
+
 ---
 
 ## 🔜 Next Priority Items
@@ -497,3 +505,4 @@ def get_db():
 | `docs/CODING_STANDARDS.md` | ✅ New | Development standards |
 | `docs/ARCHITECTURE.md` | ✅ New | System design & diagrams |
 | `docs/SYSTEM_OVERVIEW.md` | ✅ New | Workflow brainstorming |
+| `start-all.ps1` | ✅ Fixed | Starts FastAPI + Streamlit |

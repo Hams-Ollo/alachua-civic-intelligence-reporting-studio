@@ -257,6 +257,24 @@ This starts:
 
 You need **4 terminal windows** for full development:
 
+### One-Command Start (Windows)
+
+The easiest way to start both services:
+
+```powershell
+.\start-all.ps1
+```
+
+This script:
+1. Activates the virtual environment
+2. Checks/installs dependencies
+3. Launches **FastAPI** backend in a new terminal (`http://localhost:8000`)
+4. Launches **Streamlit** dev console in a new terminal (`http://localhost:8501`)
+
+### Manual Multi-Terminal Setup
+
+For full production-like setup with background tasks:
+
 #### Terminal 1: Redis
 ```bash
 # If using Docker
@@ -274,6 +292,7 @@ celery -A src.tasks.celery_app worker --loglevel=info
 #### Terminal 3: Celery Beat (Scheduler)
 ```bash
 celery -A src.tasks.celery_app beat --loglevel=info
+# Schedules Scouts to run daily at 4am (configurable in beat_schedule.py)
 ```
 
 #### Terminal 4: FastAPI Server
@@ -324,10 +343,11 @@ flowchart LR
 Run agents directly without the API:
 
 ```bash
-# Run Scout on a specific URL
+
+# Run Scout on a specific URL (manual trigger)
 python -m src.main --agent A1 --url "https://alachuafl.portal.civicclerk.com/"
 
-# Run Scout on all critical sources
+# Run Scout on all critical sources (manual trigger)
 python -m src.main --agent A1 --critical
 
 # Run Analyst on a topic

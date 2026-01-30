@@ -1,8 +1,8 @@
 # Project Plan: Open Sousveillance Studio
 
-**Version:** 1.0  
-**Last Updated:** 2026-01-29  
-**Project Lead:** Hans  
+**Version:** 1.0
+**Last Updated:** 2026-01-29
+**Project Lead:** Hans
 **Target Release:** v1.0.0
 
 ---
@@ -36,19 +36,20 @@ Build a 24/7 automated monitoring system that levels the information playing fie
 gantt
     title Open Sousveillance Studio - v1.0 Roadmap
     dateFormat  YYYY-MM-DD
-    
+
     section Phase 1
     Foundation ✅           :done, p1, 2026-01-01, 2026-01-20
-    
+
     section Phase 2
     Scout Layer 🚧          :active, p2, 2026-01-21, 2026-02-15
-    
+    Note over p2: Scouts run daily at 4am and can be manually triggered via API or Dev Console
+
     section Phase 3
     Analyst Layer           :p3, 2026-02-16, 2026-03-15
-    
+
     section Phase 4
     Integration & Polish    :p4, 2026-03-16, 2026-04-01
-    
+
     section Release
     v1.0 Release 🚀         :milestone, 2026-04-01, 0d
 ```
@@ -59,7 +60,7 @@ gantt
 
 ### Phase 1: Foundation ✅ (Complete)
 
-**Duration:** Jan 1-20, 2026  
+**Duration:** Jan 1-20, 2026
 **Status:** Complete
 
 | Deliverable | Status |
@@ -76,12 +77,12 @@ gantt
 
 ### Phase 2: Scout Layer 🚧 (Current)
 
-**Duration:** Jan 21 - Feb 15, 2026  
+**Duration:** Jan 21 - Feb 15, 2026
 **Status:** In Progress
 
 #### Goals
 
-- Automated scraping of government portals
+- Automated scraping of government portals (scheduled daily at 4am, plus manual trigger)
 - PDF document processing
 - Structured data extraction
 - Change detection and deduplication
@@ -109,7 +110,7 @@ gantt
 
 ### Phase 3: Analyst Layer
 
-**Duration:** Feb 16 - Mar 15, 2026  
+**Duration:** Feb 16 - Mar 15, 2026
 **Status:** Planned
 
 #### Goals
@@ -140,7 +141,7 @@ gantt
 
 ### Phase 4: Integration & Polish
 
-**Duration:** Mar 16 - Apr 1, 2026  
+**Duration:** Mar 16 - Apr 1, 2026
 **Status:** Planned
 
 #### Goals
