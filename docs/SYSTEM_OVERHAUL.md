@@ -37,6 +37,7 @@ This document outlines the architectural evolution of Open Sousveillance Studio 
 ## Current State Analysis
 
 ### What Works
+
 - ✅ Agent framework (Scout, Analyst, Synthesizer layers)
 - ✅ Structured output schemas (Pydantic models)
 - ✅ Prompt library organization
@@ -45,6 +46,7 @@ This document outlines the architectural evolution of Open Sousveillance Studio 
 - ✅ Streamlit dev console for testing
 
 ### What's Too Narrow
+
 - ❌ Prompts hardcode Tara as primary focus
 - ❌ Reports filter OUT non-matching items
 - ❌ Keywords are 90% Tara-specific
@@ -52,9 +54,11 @@ This document outlines the architectural evolution of Open Sousveillance Studio 
 - ❌ Can't easily adapt to other municipalities
 
 ### The Problem
+>
 > "Show up knowing about Tara but blind to everything else"
 
 ### The Goal
+>
 > "Show up knowing EVERYTHING, with priority items highlighted"
 
 ---
@@ -446,6 +450,7 @@ Track all files modified during this overhaul.
 ## Testing Checkpoints
 
 ### After Phase 1
+
 ```bash
 # Run scout on a real meeting agenda
 # Expected: ALL items documented, priority items flagged
@@ -459,6 +464,7 @@ print(f'Priority flagged: {sum(1 for i in result.items if i.priority_flag)}')
 ```
 
 ### After Phase 2
+
 ```bash
 # Verify config loading
 python -c "
@@ -470,6 +476,7 @@ print(f'Categories loaded: {len(categories)}')
 ```
 
 ### After Phase 3
+
 ```bash
 # Verify vector search
 python -c "
